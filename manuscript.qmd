@@ -1,0 +1,195 @@
+---
+title: "Manuscript Draft:"
+subtitle: Exploring Effects of the Comprehensive Addiction Recovery Act on Buprenorphine Prescribing Practices Using Open Medicare Part D Data
+date: last-modified
+
+author:
+  - name: Matthew Hoctor, PharmD
+    email: hoctor@pdx.edu
+    affiliations: 
+        - id: OHSU-PSU-SPH
+          name: Oregon Health & Science University-Portland State University School of Public Health
+          department: Department Name
+          address: Street Address
+          city: City
+          state: State
+          postal-code: Postal Code
+    attributes:
+        corresponding: true
+    # note: This is the first author footnote.
+  - name: Daniel Hartung, PharmD, MPH
+  
+keywords: 
+  - pharmacoepidemiology
+  - pharmacoeconomics
+  - buprenorphine
+  - opioid use disorder
+  - Medicare
+  
+format:
+  elsevier-pdf:
+    keep-tex: true
+    journal:
+      name: Journal Name
+      formatting: preprint
+      model: 3p
+      cite-style: number
+  
+bibliography: bibliography.bib
+
+abstract: |
+  This is the abstract; it will likely be the last thing updated. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum augue turpis, dictum non malesuada a, volutpat eget velit. Nam placerat turpis purus, eu tristique ex tincidunt et. Mauris sed augue eget turpis ultrices tincidunt. Sed et mi in leo porta egestas. Aliquam non laoreet velit. Nunc quis ex vitae eros aliquet auctor nec ac libero. Duis laoreet sapien eu mi luctus, in bibendum leo molestie. Sed hendrerit diam diam, ac dapibus nisl volutpat vitae.
+---
+
+
+```{r}
+#| label: setup
+#| include: false
+
+# load libraries:
+library(tidyverse)
+library(gt)
+library(gtsummary)
+
+# load dataset:
+if (!exists("data_pred")) {
+  load("dataset/data_pred.RData")}
+```
+
+# Introduction
+
+*This section may be shortened to meet an expected word count cap of 2500 words, and/or changed according to the literature review.*
+
+Opioids are medications are medications which act as agonists at opoid receptors in the central nervous system, producing a depressant effect, analgesia, and sometimes euphoria. Opioids are commonly used to treat pain, but are also used recreationally. Opioid use disorder (OUD) is a chronic, relapsing condition characterized by the compulsive use of opioids despite adverse consequences. OUD is a major public health concern in the United States, with an estimated 2.1 million people suffering from OUD in 2018. @comptonEpidemiologyOpioidCrisis2019 OUD is associated with a number of adverse outcomes, including increased risk of overdose and death, increased risk of infectious disease, and increased risk of incarceration. OUD is also associated with increased risk of fracture and motor-vehicle accidents. @larochelleMedicationOpioidUse2018
+
+Medications for treatment of OUD in the United States includes methadone, buprenorphine, and naltrexone; naltrexone is an opioid antagonist, whereas buprenorphine is a partial opioid agonist, and methadone is a full opioid agonist.  Guidelines from the American Society of Addiction Medicine (ASAM) recommend that all patients with OUD be offered medication for treatment of OUD. @kampmanAmericanSocietyAddiction2015; @ASAMNationalPractice2020a  However the legislative framework within the United States has historically been a barrier to providing this treatment.  Methadone may only be prescribed and dispensed for OUD treatment within the context of a licensed opoid treatment program.  In 2000, the Drug Addiction Treatment Act (DATA) was passed, which allowed physicians to prescribe buprenorphine for treatment of OUD in an office-based setting.  However, DATA limited the number of patients that a physician could treat with buprenorphine to 30 patients in the first year, and 100 patients thereafter.  In 2016, the Comprehensive Addiction Recovery Act (CARA) was passed, which allowed nurse practitioners (NPs) and physician assistants (PAs) to prescribe buprenorphine for treatment of OUD.  Recent legislation has further expanded the number of patients that a physician, NP, or PA can treat with buprenorphine to 275 patients.  
+
+However, the impact of CARA on buprenorphine prescribing practices has not been well characterized within the elderly population.  This population is of particular interest because this growing population have a unique range of risk factors including the greater prevalence of chronic pain, and may be at greater risk of complications of OUD such as fracture and motor-vehicle accident.  Future legislative and regulatory efforts could potentially be informed by an examination of the impact of CARA on buprenorphine prescribing practices within this population.  This compiled report seeks to adhere to the STROBE guidelines for observational studies, @vandenbrouckeStrengtheningReportingObservational2007 as well as the CHEERS guidelines for economic evaluations. @husereauConsolidatedHealthEconomic2022  
+
+# Methods
+
+## Study Design & Setting
+
+
+
+## Exposure
+
+
+
+## Outcome
+
+
+
+## Covariates
+
+
+
+## Statistical Analysis
+
+XGBoost paper  @chenXGBoostScalableTree2016 
+
+# Results
+
+*This section to be expanded as results accrue.*
+
+## Provider Characteristics
+
+*Text to supplement Table 1.*
+
+## Outcome: Prescribing Volume
+
+
+
+## Secondary Analyses
+
+
+
+# Discussion
+
+
+
+# Conclusion
+
+
+
+?Should I consider a statement of which author did which tasks?
+
+# References {-}
+
+
+
+# Figures & Tables
+
+## Table 1
+
+```{r}
+#| label: Table 1
+#| tbl-cap: Provider Characteristics
+#| echo: false
+#| warning: false
+#| error: false
+
+# create a year_supply function which sums over all Tot_Day_Suply and divides by 365:
+year_supply <- function(x) {
+  sum(x) / 365
+}
+
+data_pred |>
+  # mutate a new variable, dx, which is 'tx', but with the value of tx_pred substituted, when applicable
+  mutate(dx = if_else(is.na(tx_pred), tx, tx_pred)) |>
+  # filter only dx == bup_oud
+  filter(dx == "bup_oud") |>
+  # filter to years 2015 2016, 2017, 2018
+  filter(year %in% c(2015, 2016, 2017, 2018)) |>
+  # mutate a new variable, provider, which aggregates types more coarsely than 'type'
+  mutate(prvdr = case_when(
+       Prscrbr_Type %in% c("Physician Assistant", "Nurse Practitioner") ~ "NP/PA",
+       Prscrbr_Type %in% c("Family Practice", "Internal Medicine", "Family Medicine", "General Practice", "Geriatric Medicine", "Preventive Medicine") ~ "General Practice",
+       .default = "Other")) |>
+  # mutate a new variable, rural, which = 1 when ur=="rural"
+  mutate(rural = if_else(ur == "rural", 1, 0)) |>
+  # mutate(nppa = if_else(prvdr == "NP/PA",1,0)) |>
+  # mutate(GP = if_else(prvdr == "GP",1,0)) |>
+  # mutate(Other = if_else(prvdr == "Other",1,0)) |>
+  # select only variables to be tabulated
+  select(Prscrbr_NPI, year, Tot_Day_Suply, rural, prvdr) |>
+  # aggregate Tot_Day_Suply by Prscrbr_NPI, year such that no non-unique year/NPI pairs exist and total Tot_Day_Suply is preserved:
+  group_by(Prscrbr_NPI, year) |>
+  summarise(
+    Tot_Day_Suply = sum(Tot_Day_Suply),
+    rural = max(rural),
+    prvdr = max(prvdr)
+  ) |>
+  tbl_summary(
+    by = year,
+    statistic = list(
+      Prscrbr_NPI ~ "{n_distinct}",
+      Tot_Day_Suply ~ "{year_supply}",
+      rural ~ "{n} ({p})%"
+    ),
+    label = list(
+      Prscrbr_NPI ~ "Bup Prescribers",
+      Tot_Day_Suply ~ "Patient-years",
+      rural ~ "Rural Providers",
+      prvdr ~ "Provider Type:"
+    )
+  ) |>
+  modify_footnote(update = everything() ~ NA) |>
+  # modify_header(update = N ~ NA) |>
+  # modify_caption("**Table 1. Provider Characteristics**") |>
+  modify_spanning_header(all_stat_cols() ~ "**Year**")
+  # sub_values(
+  #   values = numeric,
+  #   replacement = "-"
+  # )
+```
+
+Consider adding a row for total Medicare population by year?
+
+## Other Figures
+
+Consider using a flow chart explicitly showing how the providers became part of the study dataset; I can also consider including some of the choropleth maps of the prescriber patterns, if they are illustrative of results.
+
+# Supplementary Material
+
+A full code appendix can be found at [https://github.com/matthew-hoctor/Buprenorphine_Rx](https://github.com/matthew-hoctor/Buprenorphine_Rx); and the quarto used to generate this manuscript can be found at [https://github.com/matthew-hoctor/Buprenorphine_Rx/blob/main/manuscript.qmd](https://github.com/matthew-hoctor/Buprenorphine_Rx/blob/main/manuscript.qmd.)
