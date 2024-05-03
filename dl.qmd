@@ -1,7 +1,7 @@
 ---
 title: "Data Download"
 author: "Matthew Hoctor, PharmD"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: last-modified
 
 quarto::html_document:
   theme: cerulean
@@ -27,19 +27,27 @@ library(data.table)
 library(httr2)
 library(fst)
 
-# the following lines allow linux bash commands to be run in the code chunks
+# the following lines allow linux bash commands to be run in the code chunks:
 # knitr::opts_chunk$set(engine.opts)
 ```
 
-# Overview
+# Project Overview
 
-We seek to understand the impact of the Comprehensive Addiction and Recovery Act (CARA) of 2016 on patterns of buprenorphine prescribing practices by examining medicare part D data. This exploratory analysis will download and compile medicare part D data before and after the legislation for years 2013-2021, and will examine variables of interest including buprenorphine Rx, methadone Rx, naltrexone Rx, prescriber type, cost to the patient, cost to Medicare, rural vs urban, and more.
+This project looks to understand the impact of the Comprehensive Addiction and Recovery Act (CARA) of 2016 on patterns of buprenorphine prescribing practices by examining openly available medicare part D data.  
 
-# Downloading Medicare Part D Data
+# Datasets
 
-This analysis does not require individual-patient-level data, and thus does not require the Research Identifiable Files (RIFs) or Limited Data Set (LDS) files; non-identifiable files will be used instead. Datasets from 2013-2021 from the [Medicare Part D Prescribers - by Provider and Drug](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider-and-drug) dataset was downloaded and moved to the `data` folder of the project ([data dict](https://data.cms.gov/resources/medicare-part-d-prescribers-by-provider-and-drug-data-dictionary)). It may be necessary to add info from the [Medicare Part D Prescribers - by Provider](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider) dataset if more provider info is needed; it may be interesting to look at [Medicare Part D Prescribers - by Geography and Drug Data Dictionary](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-geography-and-drug) ([data dict](https://data.cms.gov/resources/medicare-part-d-prescribers-by-geography-and-drug-data-dictionary)) later.
+This code will download the relevant datasets as .csv files (downloaded to a `data` folder not synched to github as these files are quite large) and write them to [fst files](http://www.fstpackage.org/) for fast loading.  R code using `download.file` failed due to large file size, thus a BASH script using `curl` is used instead.  This analysis does not require individual-patient-level data, and thus does not require the Research Identifiable Files (RIFs) or Limited Data Set (LDS) files; non-identifiable files will be used instead.
 
-We will be downloading .csv files from the CMS data catalogues for [ Medicare Part D Prescribers - by Provider and Drug ](https://catalog.data.gov/dataset/medicare-part-d-prescribers-by-provider-and-drug-ad73e) & [ Medicare Part D Prescribers - by Geography and Drug ](https://catalog.data.gov/dataset/medicare-part-d-prescribers-by-geography-and-drug-67fb0) using curl in bash.
+Datasets include:
+
+ - [Medicare Part D Prescribers - by Provider and Drug ](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider-and-drug); [data dict](https://data.cms.gov/resources/medicare-part-d-prescribers-by-provider-and-drug-data-dictionary); [data.gov](https://catalog.data.gov/dataset/medicare-part-d-prescribers-by-provider-and-drug-ad73e); the main dataset which includes all prescribed drugs for each provider
+ - [Medicare Part D Prescribers - by Geography and Drug ](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-geography-and-drug); [data dict](https://data.cms.gov/resources/medicare-part-d-prescribers-by-geography-and-drug-data-dictionary);  [data.gov](https://catalog.data.gov/dataset/medicare-part-d-prescribers-by-geography-and-drug-67fb0); this is essentially the above dataset aggregated by FIPS code, and thus has fewer suppressed values
+ - [Medicare Physician & Other Practitioners - by Provider and Service ](https://data.cms.gov/provider-summary-by-type-of-service/medicare-physician-other-practitioners/medicare-physician-other-practitioners-by-provider-and-service); [data dict](https://data.cms.gov/resources/medicare-physician-other-practitioners-by-provider-and-service-data-dictionary); [data.gov](https://catalog.data.gov/dataset/medicare-physician-other-practitioners-by-provider-and-service-b156e); includes data on services rendered
+
+It may be interesting to look at:
+
+ - [Medicare Part D Prescribers - by Provider](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider); includes other provider-specific data, such as [RUCA codes](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes.aspx)
 
 # Data Download
 
@@ -107,9 +115,9 @@ if(!file.exists("data/geo/2013.csv")){
 
 ## Medicare Part D Prescribers - by Provider and Drug
 
-### Attempting to use R
-
 We will attempt to download the datasets using the R code as above, but if that fails, we will use the bash code below.
+
+### Attempting to use R
 
 ```{r}
 if(!file.exists("data/2021.csv")){
@@ -179,43 +187,95 @@ for url in "https://data.cms.gov/sites/default/files/2021-08/MUP_DPR_RY21_P04_V1
   done
 ```
 
+## Medicare Physician & Other Practitioners - by Provider and Service
+
+```{bash, engine.path='/bin/bash'}
+for url in "https://data.cms.gov/sites/default/files/2020-08/MUP_PHY_R19_P04_V10_D13_Prov_Svc.csv" "https://data.cms.gov/sites/default/files/2020-07/MUP_PHY_R19_P04_V10_D14_Prov_Svc.csv" "https://data.cms.gov/sites/default/files/2020-07/MUP_PHY_R19_P04_V10_D15_Prov_Svc.csv" "https://data.cms.gov/sites/default/files/2020-07/MUP_PHY_R19_P04_V10_D16_Prov_Svc.csv" "https://data.cms.gov/sites/default/files/2020-07/MUP_PHY_R19_P04_V10_D17_Prov_Svc.csv" "https://data.cms.gov/sites/default/files/2020-12/MUP_PHY_R20_P04_V10_D18_Prov_Svc.csv" "https://data.cms.gov/sites/default/files/2021-08/MUP_PHY_R21_P04_V10_D19_Prov_Svc.csv" "https://data.cms.gov/sites/default/files/2022-11/2260d1cc-9635-4c36-b890-61e672c3fea1/MUP_PHY_R22_P05_V10_D20_Prov_Svc.csv" "https://data.cms.gov/sites/default/files/2023-05/914a4463-7af3-423f-83a7-b343794e20ee/MUP_PHY_R23_P05_V10_D21_Prov_Svc.csv" 
+  do
+      i=$((i+1))
+      year=$((2012+$i))
+      echo "URL: $url"
+      if [[ -f data/svc/$year.csv ]]
+      then
+        echo "The file $year.csv is already downloaded."
+      else
+        curl -X 'GET' $url -o data/svc/$year.csv
+      fi
+  done
+```
+
 # Write FST Files
 
-Starting with the main dataset:
+## Medicare Part D Prescribers - by Provider and Drug
 
 ```{r}
 for (year in 2013:2021) {
-  # load the data:
-  data_year <- read_csv(
-    paste0("data/", year, ".csv"),
-    show_col_types = FALSE,
-    progress = FALSE
-  )
-  # write the data:
-  write_fst(
-    data_year, 
-    paste0("data/", year, ".fst")
-  )
+  # check if the fst file is already present
+  if(!file.exists(paste0("data/", year, ".fst"))){
+    # load the data:
+    data_year <- read_csv(
+      paste0("data/", year, ".csv"),
+      show_col_types = FALSE,
+      progress = FALSE
+    )
+    # write the data:
+    write_fst(
+      data_year, 
+      paste0("data/", year, ".fst")
+    )
+  } else{
+    print(paste0("data/", year, ".fst already serialized"))
+  }
 }
 # cleanup
 rm(year, data_year)
 ```
 
-Repeating for the geographic data:
+## Medicare Part D Prescribers - by Geography and Drug
 
 ```{r}
 for (year in 2013:2021) {
-  # load the data:
-  data_year <- read_csv(
-    paste0("data/geo/", year, ".csv"),
-    show_col_types = FALSE,
-    progress = FALSE
-  )
-  # write the data:
-  write_fst(
-    data_year, 
-    paste0("data/geo/", year, ".fst")
-  )
+  # check if the fst file is already present
+  if(!file.exists(paste0("data/geo/", year, ".fst"))){
+    # load the data:
+    data_year <- read_csv(
+      paste0("data/geo/", year, ".csv"),
+      show_col_types = FALSE,
+      progress = FALSE
+    )
+    # write the data:
+    write_fst(
+      data_year, 
+      paste0("data/geo/", year, ".fst")
+    )
+  } else{
+    print(paste0("data/geo/", year, ".fst already serialized"))
+  }
+}
+# cleanup
+rm(year, data_year)
+```
+
+## Medicare Physician & Other Practitioners - by Provider and Service
+
+```{r}
+for (year in 2013:2021) {
+  # check if the fst file is already present
+  if(!file.exists(paste0("data/svc/", year, ".fst"))){
+    # load the data:
+    data_year <- read_csv(
+      paste0("data/svc/", year, ".csv"),
+      show_col_types = FALSE,
+      progress = FALSE
+    )
+    # write the data:
+    write_fst(
+      data_year, 
+      paste0("data/svc/", year, ".fst")
+    )
+  } else{
+    print(paste0("data/svc/", year, ".fst already serialized"))
+  }
 }
 # cleanup
 rm(year, data_year)
