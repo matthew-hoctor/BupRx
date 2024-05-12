@@ -8,7 +8,8 @@ Materials and code for my MPH practice experience project on the effect of the C
     - [Zotero Library](https://www.zotero.org/groups/5256893/buprenorphine__cara/library)
  - Dataset
     - [Data Download](https://matthew-hoctor.github.io/BupRx/dl.html)
-    - [Dataset Cleaning](https://matthew-hoctor.github.io/BupRx/dataset.html)
+    - [Provider and OUD treatment variables](https://matthew-hoctor.github.io/BupRx/dataset_tx.html)
+    - [Geographic variables (rural/urban, etc)](https://matthew-hoctor.github.io/BupRx/dataset_geo.html)
     - [XGBoost prediction of ambiguous entries](https://matthew-hoctor.github.io/BupRx/classification.html)
  - Analysis
     - [Exploratory Analysis](https://matthew-hoctor.github.io/BupRx/exploratory.html)
