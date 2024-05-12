@@ -47,7 +47,7 @@ Datasets include:
 
 It may be interesting to look at:
 
- - [Medicare Part D Prescribers - by Provider](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider); includes other provider-specific data, such as [RUCA codes](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes.aspx)
+ - [Medicare Part D Prescribers - by Provider](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider); [data dict](https://data.cms.gov/resources/medicare-part-d-prescribers-by-provider-data-dictionary); [data.gov](https://catalog.data.gov/dataset/medicare-part-d-prescribers-by-provider-a2fc0); includes other provider-specific data, such as address, [RUCA codes](https://www.ers.usda.gov/data-products/rural-urban-commuting-area-codes.aspx), and aggregate patient demographics
 
 # Data Download
 
@@ -187,6 +187,23 @@ for url in "https://data.cms.gov/sites/default/files/2021-08/MUP_DPR_RY21_P04_V1
   done
 ```
 
+## Medicare Part D Prescribers - by Provider 
+
+```{bash, engine.path='/bin/bash'}
+for url in "https://data.cms.gov/sites/default/files/2021-08/MUP_DPR_RY21_P04_V10_DY13_NPI.csv" "https://data.cms.gov/sites/default/files/2021-08/MUP_DPR_RY21_P04_V10_DY14_NPI.csv" "https://data.cms.gov/sites/default/files/2021-08/MUP_DPR_RY21_P04_V10_DY15_NPI.csv" "https://data.cms.gov/sites/default/files/2021-08/MUP_DPR_RY21_P04_V10_DY16_NPI.csv" "https://data.cms.gov/sites/default/files/2023-06/25a44c61-8836-4fea-b740-809805613e89/MUP_DPR_RY21_P04_V10_DY17_NPI.csv" "https://data.cms.gov/sites/default/files/2021-08/MUP_DPR_RY21_P04_V10_DY18_NPI.csv" "https://data.cms.gov/sites/default/files/2021-08/MUP_DPR_RY21_P04_V10_DY19_NPI.csv" "https://data.cms.gov/sites/default/files/2022-07/27dd79c1-2fe9-4596-8b55-bfeaa2cd4ca8/MUP_DPR_RY22_P04_V10_DY20_NPI.csv" "https://data.cms.gov/sites/default/files/2023-04/654a5915-691f-4d49-a49c-d0988fb56f86/MUP_DPR_RY23_P04_V10_DY21_NPI.csv" 
+  do
+      i=$((i+1))
+      year=$((2012+$i))
+      echo "URL: $url"
+      if [[ -f data/prv/$year.csv ]]
+      then
+        echo "The file $year.csv is already downloaded."
+      else
+        curl -X 'GET' $url -o data/prv/$year.csv
+      fi
+  done
+```
+
 ## Medicare Physician & Other Practitioners - by Provider and Service
 
 ```{bash, engine.path='/bin/bash'}
@@ -202,6 +219,37 @@ for url in "https://data.cms.gov/sites/default/files/2020-08/MUP_PHY_R19_P04_V10
         curl -X 'GET' $url -o data/svc/$year.csv
       fi
   done
+```
+
+## USGS Geographic Names Information System (GNIS)
+
+Using the USGS Populated Places dataset, we will attempt to convert the city/state data from the dataset into a a FIPS code, which will be used to lookup the CDC's 2013 Urban-Rural Classification.  The USGS dataset (which can be found as a text file within their Geographic Names Information System (GNIS) [here](https://www.usgs.gov/us-board-on-geographic-names/download-gnis-data)) contains several variables including the state name/FIPS, the 'map name' (which is often the city name), and the county name/FIPS.
+
+```{r}
+if(!file.exists("data/Text/PopulatedPlaces_National.txt")){
+  download.file("https://prd-tnm.s3.amazonaws.com/StagedProducts/GeographicNames/Topical/PopulatedPlaces_National_Text.zip", 
+                method = "libcurl",
+                destfile = "data/PopulatedPlaces_National_Text.zip")
+  unzip(zipfile = "data/PopulatedPlaces_National_Text.zip",
+        files = "Text/PopulatedPlaces_National.txt",
+        exdir = "data")
+} else{
+  print("PopulatedPlaces_National.txt already downloaded and unzipped")
+}
+```
+
+## NCHS Urban-Rural Classification Scheme
+
+Using the USGS Populated Places dataset, we will attempt to convert the city/state data from the dataset into a a FIPS code, which will be used to lookup the CDC's 2013 Urban-Rural Classification.  In addition to the GNIS dataset (above), we can use the FIPS code to lookup the CDC's [2013 Urban-Rural Classification Scheme for Counties](https://www.cdc.gov/nchs/data_access/urban_rural.htm); specifically using the [NCHSurbruralcodes Spreadsheet](https://www.cdc.gov/nchs/data/data_acces_files/NCHSURCodes2013.xlsx) which contains the FIPS codes and rural-urban classifications for each county in the US.
+
+```{r}
+if(!file.exists("data/NCHSURCodes2013.xlsx")){
+  download.file("https://www.cdc.gov/nchs/data/data_acces_files/NCHSURCodes2013.xlsx", 
+                method = "libcurl",
+                destfile = "data/NCHSURCodes2013.xlsx")
+} else{
+  print("NCHSURCodes2013.xlsx already downloaded")
+}
 ```
 
 # Write FST Files
@@ -250,6 +298,31 @@ for (year in 2013:2021) {
     )
   } else{
     print(paste0("data/geo/", year, ".fst already serialized"))
+  }
+}
+# cleanup
+rm(year, data_year)
+```
+
+## Medicare Part D Prescribers - by Provider
+
+```{r}
+for (year in 2013:2021) {
+  # check if the fst file is already present
+  if(!file.exists(paste0("data/prv/", year, ".fst"))){
+    # load the data:
+    data_year <- read_csv(
+      paste0("data/prv/", year, ".csv"),
+      show_col_types = FALSE,
+      progress = FALSE
+    )
+    # write the data:
+    write_fst(
+      data_year, 
+      paste0("data/prv/", year, ".fst")
+    )
+  } else{
+    print(paste0("data/prv/", year, ".fst already serialized"))
   }
 }
 # cleanup
