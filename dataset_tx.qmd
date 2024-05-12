@@ -1,0 +1,317 @@
+---
+title: "Dataset - Treatment Variable"
+author: "Matthew Hoctor, PharmD"
+date: last-modified
+
+quarto::html_document:
+  theme: cerulean
+  highlight: github
+  
+toc: true
+toc-depth: 4
+toc-location: left
+toc-title: Contents
+  
+code-fold: show
+code-overflow: wrap
+code-tools: true
+code-link: true
+
+editor: source
+---
+
+```{r setup, include = FALSE}
+# load libraries:
+library(tidyverse)
+library(fst)              # to load .fst files
+library(data.table)       # ?is this package necessary?
+# library(readxl)           # read excel files
+# library(readODS)          # to read .ods file
+# library(campfin)          # for working with abbreviations commonly found in US place names
+# library(SUNGEO)           # for batch geocoding from OSM
+# library(fipio)            # for coords_to_fips() function
+# library(zipcodeR)         # to search for the zip with the coordinates using search_radius()
+# library(tidygeocoder)     # for batch geocoding from multiple sources in parallel
+# library(tidycensus)       # ?county name to FIPS?
+```
+
+# Overview
+
+This project looks to understand the impact of the Comprehensive Addiction and Recovery Act (CARA) of 2016 on patterns of buprenorphine prescribing practices by examining openly available medicare part D data.
+
+The steps in this page show the data generation process for the treatment variable;  the data be downloaded first, see the [data download](https://matthew-hoctor.github.io/BupRx/dl.html) page for specifics.  Subsequent pages show how [geographic](https://matthew-hoctor.github.io/BupRx/data_geo.html) and [provider](https://matthew-hoctor.github.io/BupRx/data_prv.html) variables are compiled.
+
+# Treatment Variable
+
+## Treatment Function
+
+We will now create a function to generate the treatment variable, `tx` for each year of data.  For this function we will use the `data_year` argument to refer to the dataset to be processed, and allow for non-default arguments for brand names to match with the `bup_brands_pattern` variables.  We will generate the `tx` variable, and will also generate `MAT_generic` and `MAT_brand` to serve as a check on the `tx` variable.  The dataset returned will only include entries for which any of these three variables are not NA, thus dramatically reducing the dataset size.
+
+Sorting each observation according to treatment intention, and assign values to the `tx` variable is the main effect of the function below.  Entries in which buprenorphine was used to treat OUD will be assigned `bup_oud`, entries in which buprenorphine was used to treat pain will be assigned `bup_pain`.  Products indicated for OUD include Sublocade, Brixadi (not available during the years studied), all forms of Buprenorphine Hcl/Naloxone Hcl (Suboxone, Zubsolv, Bunavail, Cassipa, and generic), and Buprenorphine HCl (sublingual, NB that that certain NDCs of this product are reported only as 'Buprenorphine' for the brand and generic names); whereas products indicated for pain include Belbuca (buprenorphine HCl buccal), Buprenex, Butrans, Probuphine (implant, discontinued), generic buprenorphine HCl (parenteral), and generic buprenorphine transdermal patches.  Thus, in the `Brnd_Name` vs `Gnrc_Name` cross-tabulation above, we see that two entries are possibly ambiguous, those in which both variables have the value `Buprenorphine` (which could be generic buprenorphine transdermal patches [pain] or buprenorphine HCl sublingual tablets [OUD]), and those in which both variables have the variable `Buprenorphine HCl` (which could be parenteral buprenorphine HCl [pain], or buprenorphine HCl sublingual tablets [OUD]).  Given that usage of buprenorphine for pain is not common practice in the U.S., we will for the moment assume that these ambiguous entries are for OUD, and will generate the `tx` variable by recoding the `Brnd_Name` variable (although see the [classification](https://matthew-hoctor.github.io/BupRx/classification.html) entry, in which indications for these entries are teased apart with the xgboost algorithm based on the prescriber's prescribing patterns).
+
+Entries in which methadone was used to treat OUD will be assigned `met_oud`, entries in which methadone was used to treat pain will be assigned `met_pain`.  Products indicated for OUD include Dolophine (methadone HCl oral concentrate), Methadone HCl (oral concentrate, oral solution, oral tablet), Methadose (oral concentrate, oral solution, oral tablet), and generic methadone HCl (oral concentrate, oral solution, oral tablet); whereas products indicated for pain include generic methadone HCl (parenteral), Dolophine and Methadone Intensol.  Thus, in the `Brnd_Name` vs `Gnrc_Name` cross-tabulation above, we see that two entries are possibly ambiguous, those in which both variables have the value `Methadone HCl` (which could be parenteral methadone HCl [pain], or methadone HCl oral concentrate, oral solution, Dolophine, or oral tablet [OUD]).  Given that usage of methadone for pain is not common practice in the U.S., we will assume that these ambiguous entries are for OUD, and will generate the `tx` variable by recoding the `Brnd_Name` variable.
+
+```{r}
+# create a function to process the data; :
+treatment <- function(data_year, bup_brands_pattern = NULL, met_brands_pattern = NULL, nal_brands_pattern = NULL) {
+  # create the MAT_generic variable for buprenorphine:
+  data_year$MAT_generic <- ifelse(
+    str_detect(
+      data_year$Gnrc_Name, 
+      regex("bupre", ignore_case = TRUE)),
+    "bup", 
+    NA)
+  
+  # create the MAT_brand variable for buprenorphine:
+  # if `bup_brands_pattern` not supplied as an argument, starting by creating a vector of buprenorphine brand names and concatinating to regex:
+  if (is.null(bup_brands_pattern)) {
+    bup_brands <- c("Belbuca", "Bunavail", "Buprenex", "Buprenorphine", "Butrans", "Probuphine", "Sublocade", "Suboxone", "Subutex", "Zubsolv")
+    bup_brands_pattern <- paste(bup_brands, collapse = "|")
+  }
+  # assign the MAT_brand value based on the regex:
+  data_year$MAT_brand <- ifelse(
+    str_detect(
+      data_year$Brnd_Name, 
+      regex(bup_brands_pattern, ignore_case = TRUE)),
+    "bup", 
+    NA)
+  
+  # create the MAT_generic variable for methadone:
+  data_year$MAT_generic <- ifelse(
+    str_detect(
+      data_year$Gnrc_Name, 
+      regex("methad", ignore_case = TRUE)),
+    "met", 
+    data_year$MAT_generic)
+  
+  # create the MAT_brand variable for methadone:
+  # if `met_brands_pattern` not supplied as an argument, starting by creating a vector of methadone brand names and concatinating to regex:
+  if (is.null(met_brands_pattern)) {
+    met_brands <- c("Dolophine", "Methadone", "Methadose", "Diskets")
+    met_brands_pattern <- paste(met_brands, collapse = "|")
+  }
+  # assign the MAT_brand value:
+  data_year$MAT_brand <- ifelse(
+    str_detect(
+      data_year$Brnd_Name, 
+      regex(met_brands_pattern, ignore_case = TRUE)),
+    "met", 
+    data_year$MAT_brand)
+  
+  # create the MAT_generic variable for naltrexone:
+  data_year$MAT_generic <- ifelse(
+    str_detect(
+      data_year$Gnrc_Name, 
+      regex("naltrex", ignore_case = TRUE))
+      & !str_detect(data_year$Gnrc_Name, regex("Methylnaltrexone", ignore_case = TRUE))  # filter out methylnaltrexone
+      & !str_detect(data_year$Gnrc_Name, regex("Bupropion", ignore_case = TRUE))         # filter out Contrave
+      & !str_detect(data_year$Brnd_Name, regex("Embeda", ignore_case = TRUE)),           # filter out Embeda
+    "nal", 
+    data_year$MAT_generic)
+  
+  # create the MAT_brand variable for naltrexone:
+  # if `nal_brands_pattern` not supplied as an argument, starting by creating a vector of naltrexone brand names and concatinating to regex:
+  if (is.null(nal_brands_pattern)) {
+    nal_brands <- c("Depade", "Naltrexone", "Revia", "Vivitrol")
+    nal_brands_pattern <- paste(nal_brands, collapse = "|")
+  }
+  # assign the MAT_brand value:
+  data_year$MAT_brand <- ifelse(
+    str_detect(
+      data_year$Brnd_Name, 
+      regex(nal_brands_pattern, ignore_case = TRUE)),
+    "nal", 
+    data_year$MAT_brand)
+  
+  # create the tx variable using `case_match` as above:
+data_year$tx <- case_match(
+  data_year$Brnd_Name,
+    c("Bunavail", "Buprenorphine", "Buprenorphine Hcl", "Buprenorphine-Naloxone", "Sublocade", "Suboxone", "Subutex", "Zubsolv") ~ "bup_oud",
+    c("Belbuca", "Buprenex", "Butrans", "Probuphine") ~ "bup_pain",
+    c("Methadone Hcl", "Methadose", "Dolophine Hcl", "Diskets") ~ "met_oud",
+    c("Methadone Diskets", "Methadone Intensol") ~ "met_pain",
+    c("Depade", "Naltrexone", "Revia", "Vivitrol", "Naltrexone Hcl", "Naltrexone Microspheres") ~ "nal_oud",
+    .default = NA
+)
+  
+# return the dataset limited to observations with a value in at least one of the MAT variables or the tx variable:
+  return(data_year[!is.na(data_year$MAT_generic) | !is.na(data_year$MAT_brand) | !is.na(data_year$tx), ])
+}
+```
+
+## Compile treatment variables
+
+We can now iteratively apply the function to each year of data:
+
+```{r}
+#| output: false
+
+# initialize data_tx as an empty dataset:
+data_tx <- data.frame()
+
+# iterate over years 2013-2021:
+for (year in 2013:2021) {
+  # generate filename for that year's fst file
+  data_year <- paste0("data/", year, ".fst") |>
+    # read the fst
+    read_fst() |>
+    # apply the treatment function (above)
+    treatment() |> 
+    # label each entry with the year
+    mutate(year = year)
+  # append the data to the `data_tx` dataset:
+  data_tx <- rbind(data_tx, data_year)
+}
+
+# cleanup
+rm(data_year, year)
+```
+
+## Validate
+
+We can now validate the new dataset by tabulating `tx` vs `brand names` variables as above:
+
+```{r}
+table(data_tx$Brnd_Name[!is.na(data_tx$MAT_generic)], data_tx$tx[!is.na(data_tx$MAT_generic)]) |>
+  # add row for totals:
+  addmargins(margin = 1) 
+```
+
+We can see that two lines correspond to null values for the MAT variables, "Diskets" (a methadone OUD product), "Dolophine Hcl" (a methadone product indicated for OUD or pain), but not "Embeda" (a morphine/naltrexone product filtered out by the treatment function).  We will now count the number of observations with NA values for one or more of the MAT variables or the tx variable:
+
+```{r}
+# filter to observations with NA values for one or more of the MAT variables or the tx variable:
+data_tx |>
+  filter(is.na(MAT_generic) | is.na(MAT_brand) | is.na(tx)) |>
+  nrow()
+# filter to observations with NA values for generic:
+data_tx |>
+  filter(is.na(MAT_generic)) |>
+  nrow()
+# filter to observations with NA values for brand:
+data_tx |>
+  filter(is.na(MAT_brand)) |>
+  nrow()
+# filter to observations with NA values for tx:
+data_tx |>
+  filter(is.na(tx)) |>
+  nrow()
+```
+
+# Providers
+
+First we will extract a list of unique NPIs of the providers in the main dataset:
+
+```{r}
+NPIS <- data_tx$Prscrbr_NPI |>
+  unique()
+```
+
+We can now iteratively compile the provider dataset
+
+```{r}
+#| output: false
+
+# initialize data_tx as an empty dataset:
+prv <- data.frame()
+
+# iterate over years 2013-2021:
+for (year in 2013:2021) {
+  # generate filename for that year's fst file
+  prv_year <- paste0("data/prv/", year, ".fst") |>
+    # read the fst
+    read_fst() |>
+    # filter providers with matching NPIs
+    filter(PRSCRBR_NPI %in% NPIS) |>
+    # label each entry with the year
+    mutate(year = year)
+  # append the data to the `data_tx` dataset:
+  prv <- rbind(prv, prv_year)
+}
+
+# cleanup
+rm(prv_year, year)
+```
+
+## Provider Type
+
+Overview of provider types
+
+```{r}
+data_tx |> 
+  group_by(Prscrbr_Type) |> 
+  summarize(n = n()) |> 
+  arrange(desc(n))
+```
+
+Further exploration of provider types:
+
+```{r}
+data_tx |> 
+  filter(tx == "bup_oud") |>
+  group_by(Prscrbr_Type, year) |> 
+  summarize(
+      n = n(), 
+      Supply_yr = round(sum(Tot_Day_Suply)/365, digits=1),
+      Supply_per_Provider_yr = round(Supply_yr/n, digits=1)
+    ) |> 
+  arrange(year, desc(n)) |>
+  # select only the top 10 entries of each year
+  group_by(year) |>
+  slice_max(n, n = 10)
+```
+
+Specify the provider type simplified variable
+
+```{r}
+data_tx <- data_tx |> 
+   mutate(
+     prv_type = case_when(
+       Prscrbr_Type %in% c("Physician Assistant") ~ "PA",
+       Prscrbr_Type %in% c("Nurse Practitioner") ~ "NP",
+       Prscrbr_Type %in% c("Pharmacist") ~ "RPh",
+       Prscrbr_Type %in% c("Family Practice", "Internal Medicine", "Family Medicine", "General Practice", "Geriatric Medicine", "Preventive Medicine") ~ "FP/IM",
+       Prscrbr_Type %in% c("Anesthesiology", "Pain Management	", "Interventional Pain Management", "Pain Medicine") ~ "Pain",
+       Prscrbr_Type %in% c("Psychiatry", "Psychiatry & Neurology", "Neuropsychiatry", "Addiction Medicine", "Counselor") ~ "Psych",
+       .default = "Other"
+     )
+   )
+```
+
+# Save datasets
+
+Create final dataset, save datasets, and cleanup:
+
+```{r}
+# save treatment dataset
+save(
+  data_tx,
+  file = "dataset/data_tx.RData",
+  compress = TRUE,
+  compression_level = 9
+)
+write_fst(
+  data_tx,
+  path = "dataset/data_tx.fst"
+)
+
+# save the prv dataset
+save(
+  prv,
+  file = "dataset/prv.RData",
+  compress = TRUE,
+  compression_level = 9
+)
+write_fst(
+  prv,
+  path = "dataset/prv.fst"
+)
+# cleanup
+rm(data_tx, prv, treatment)
+```
+
+# Session Info
+
+```{r}
+sessionInfo()
+```

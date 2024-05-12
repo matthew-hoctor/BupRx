@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Matthew Hoctor, PharmD">
+<meta name="dcterms.date" content="2024-05-11">
+<title>Dataset - Treatment Variable</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="dataset_tx_files/libs/clipboard/clipboard.min.js"></script>
+<script src="dataset_tx_files/libs/quarto-html/quarto.js"></script>
+<script src="dataset_tx_files/libs/quarto-html/popper.min.js"></script>
+<script src="dataset_tx_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="dataset_tx_files/libs/quarto-html/anchor.min.js"></script>
+<link href="dataset_tx_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="dataset_tx_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="dataset_tx_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="dataset_tx_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="dataset_tx_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+</head>
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Contents</h2>
+   
+  <ul>
+<li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li>
+<a href="#treatment-variable" id="toc-treatment-variable" class="nav-link" data-scroll-target="#treatment-variable">Treatment Variable</a>
+  <ul>
+<li><a href="#treatment-function" id="toc-treatment-function" class="nav-link" data-scroll-target="#treatment-function">Treatment Function</a></li>
+  <li><a href="#compile-treatment-variables" id="toc-compile-treatment-variables" class="nav-link" data-scroll-target="#compile-treatment-variables">Compile treatment variables</a></li>
+  <li><a href="#validate" id="toc-validate" class="nav-link" data-scroll-target="#validate">Validate</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#providers" id="toc-providers" class="nav-link" data-scroll-target="#providers">Providers</a>
+  <ul>
+<li><a href="#provider-type" id="toc-provider-type" class="nav-link" data-scroll-target="#provider-type">Provider Type</a></li>
+  </ul>
+</li>
+  <li><a href="#save-datasets" id="toc-save-datasets" class="nav-link" data-scroll-target="#save-datasets">Save datasets</a></li>
+  <li><a href="#session-info" id="toc-session-info" class="nav-link" data-scroll-target="#session-info">Session Info</a></li>
+  </ul></nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Dataset - Treatment Variable</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Matthew Hoctor, PharmD </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 11, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header><section id="overview" class="level1"><h1>Overview</h1>
+<p>This project looks to understand the impact of the Comprehensive Addiction and Recovery Act (CARA) of 2016 on patterns of buprenorphine prescribing practices by examining openly available medicare part D data.</p>
+<p>The steps in this page show the data generation process for the treatment variable; the data be downloaded first, see the <a href="https://matthew-hoctor.github.io/BupRx/dl.html">data download</a> page for specifics. Subsequent pages show how <a href="https://matthew-hoctor.github.io/BupRx/data_geo.html">geographic</a> and <a href="https://matthew-hoctor.github.io/BupRx/data_prv.html">provider</a> variables are compiled.</p>
+</section><section id="treatment-variable" class="level1"><h1>Treatment Variable</h1>
+<section id="treatment-function" class="level2"><h2 class="anchored" data-anchor-id="treatment-function">Treatment Function</h2>
+<p>We will now create a function to generate the treatment variable, <code>tx</code> for each year of data. For this function we will use the <code>data_year</code> argument to refer to the dataset to be processed, and allow for non-default arguments for brand names to match with the <code>bup_brands_pattern</code> variables. We will generate the <code>tx</code> variable, and will also generate <code>MAT_generic</code> and <code>MAT_brand</code> to serve as a check on the <code>tx</code> variable. The dataset returned will only include entries for which any of these three variables are not NA, thus dramatically reducing the dataset size.</p>
+<p>Sorting each observation according to treatment intention, and assign values to the <code>tx</code> variable is the main effect of the function below. Entries in which buprenorphine was used to treat OUD will be assigned <code>bup_oud</code>, entries in which buprenorphine was used to treat pain will be assigned <code>bup_pain</code>. Products indicated for OUD include Sublocade, Brixadi (not available during the years studied), all forms of Buprenorphine Hcl/Naloxone Hcl (Suboxone, Zubsolv, Bunavail, Cassipa, and generic), and Buprenorphine HCl (sublingual, NB that that certain NDCs of this product are reported only as ‘Buprenorphine’ for the brand and generic names); whereas products indicated for pain include Belbuca (buprenorphine HCl buccal), Buprenex, Butrans, Probuphine (implant, discontinued), generic buprenorphine HCl (parenteral), and generic buprenorphine transdermal patches. Thus, in the <code>Brnd_Name</code> vs <code>Gnrc_Name</code> cross-tabulation above, we see that two entries are possibly ambiguous, those in which both variables have the value <code>Buprenorphine</code> (which could be generic buprenorphine transdermal patches [pain] or buprenorphine HCl sublingual tablets [OUD]), and those in which both variables have the variable <code>Buprenorphine HCl</code> (which could be parenteral buprenorphine HCl [pain], or buprenorphine HCl sublingual tablets [OUD]). Given that usage of buprenorphine for pain is not common practice in the U.S., we will for the moment assume that these ambiguous entries are for OUD, and will generate the <code>tx</code> variable by recoding the <code>Brnd_Name</code> variable (although see the <a href="https://matthew-hoctor.github.io/BupRx/classification.html">classification</a> entry, in which indications for these entries are teased apart with the xgboost algorithm based on the prescriber’s prescribing patterns).</p>
+<p>Entries in which methadone was used to treat OUD will be assigned <code>met_oud</code>, entries in which methadone was used to treat pain will be assigned <code>met_pain</code>. Products indicated for OUD include Dolophine (methadone HCl oral concentrate), Methadone HCl (oral concentrate, oral solution, oral tablet), Methadose (oral concentrate, oral solution, oral tablet), and generic methadone HCl (oral concentrate, oral solution, oral tablet); whereas products indicated for pain include generic methadone HCl (parenteral), Dolophine and Methadone Intensol. Thus, in the <code>Brnd_Name</code> vs <code>Gnrc_Name</code> cross-tabulation above, we see that two entries are possibly ambiguous, those in which both variables have the value <code>Methadone HCl</code> (which could be parenteral methadone HCl [pain], or methadone HCl oral concentrate, oral solution, Dolophine, or oral tablet [OUD]). Given that usage of methadone for pain is not common practice in the U.S., we will assume that these ambiguous entries are for OUD, and will generate the <code>tx</code> variable by recoding the <code>Brnd_Name</code> variable.</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># create a function to process the data; :</span></span>
+<span><span class="va">treatment</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data_year</span>, <span class="va">bup_brands_pattern</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">met_brands_pattern</span> <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">nal_brands_pattern</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># create the MAT_generic variable for buprenorphine:</span></span>
+<span>  <span class="va">data_year</span><span class="op">$</span><span class="va">MAT_generic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span></span>
+<span>    <span class="fu">str_detect</span><span class="op">(</span></span>
+<span>      <span class="va">data_year</span><span class="op">$</span><span class="va">Gnrc_Name</span>, </span>
+<span>      <span class="fu">regex</span><span class="op">(</span><span class="st">"bupre"</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="st">"bup"</span>, </span>
+<span>    <span class="cn">NA</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># create the MAT_brand variable for buprenorphine:</span></span>
+<span>  <span class="co"># if `bup_brands_pattern` not supplied as an argument, starting by creating a vector of buprenorphine brand names and concatinating to regex:</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html">is.null</a></span><span class="op">(</span><span class="va">bup_brands_pattern</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">bup_brands</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Belbuca"</span>, <span class="st">"Bunavail"</span>, <span class="st">"Buprenex"</span>, <span class="st">"Buprenorphine"</span>, <span class="st">"Butrans"</span>, <span class="st">"Probuphine"</span>, <span class="st">"Sublocade"</span>, <span class="st">"Suboxone"</span>, <span class="st">"Subutex"</span>, <span class="st">"Zubsolv"</span><span class="op">)</span></span>
+<span>    <span class="va">bup_brands_pattern</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">bup_brands</span>, collapse <span class="op">=</span> <span class="st">"|"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="co"># assign the MAT_brand value based on the regex:</span></span>
+<span>  <span class="va">data_year</span><span class="op">$</span><span class="va">MAT_brand</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span></span>
+<span>    <span class="fu">str_detect</span><span class="op">(</span></span>
+<span>      <span class="va">data_year</span><span class="op">$</span><span class="va">Brnd_Name</span>, </span>
+<span>      <span class="fu">regex</span><span class="op">(</span><span class="va">bup_brands_pattern</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="st">"bup"</span>, </span>
+<span>    <span class="cn">NA</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># create the MAT_generic variable for methadone:</span></span>
+<span>  <span class="va">data_year</span><span class="op">$</span><span class="va">MAT_generic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span></span>
+<span>    <span class="fu">str_detect</span><span class="op">(</span></span>
+<span>      <span class="va">data_year</span><span class="op">$</span><span class="va">Gnrc_Name</span>, </span>
+<span>      <span class="fu">regex</span><span class="op">(</span><span class="st">"methad"</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="st">"met"</span>, </span>
+<span>    <span class="va">data_year</span><span class="op">$</span><span class="va">MAT_generic</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># create the MAT_brand variable for methadone:</span></span>
+<span>  <span class="co"># if `met_brands_pattern` not supplied as an argument, starting by creating a vector of methadone brand names and concatinating to regex:</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html">is.null</a></span><span class="op">(</span><span class="va">met_brands_pattern</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">met_brands</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Dolophine"</span>, <span class="st">"Methadone"</span>, <span class="st">"Methadose"</span>, <span class="st">"Diskets"</span><span class="op">)</span></span>
+<span>    <span class="va">met_brands_pattern</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">met_brands</span>, collapse <span class="op">=</span> <span class="st">"|"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="co"># assign the MAT_brand value:</span></span>
+<span>  <span class="va">data_year</span><span class="op">$</span><span class="va">MAT_brand</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span></span>
+<span>    <span class="fu">str_detect</span><span class="op">(</span></span>
+<span>      <span class="va">data_year</span><span class="op">$</span><span class="va">Brnd_Name</span>, </span>
+<span>      <span class="fu">regex</span><span class="op">(</span><span class="va">met_brands_pattern</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="st">"met"</span>, </span>
+<span>    <span class="va">data_year</span><span class="op">$</span><span class="va">MAT_brand</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># create the MAT_generic variable for naltrexone:</span></span>
+<span>  <span class="va">data_year</span><span class="op">$</span><span class="va">MAT_generic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span></span>
+<span>    <span class="fu">str_detect</span><span class="op">(</span></span>
+<span>      <span class="va">data_year</span><span class="op">$</span><span class="va">Gnrc_Name</span>, </span>
+<span>      <span class="fu">regex</span><span class="op">(</span><span class="st">"naltrex"</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span>      <span class="op">&amp;</span> <span class="op">!</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">data_year</span><span class="op">$</span><span class="va">Gnrc_Name</span>, <span class="fu">regex</span><span class="op">(</span><span class="st">"Methylnaltrexone"</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>  <span class="co"># filter out methylnaltrexone</span></span>
+<span>      <span class="op">&amp;</span> <span class="op">!</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">data_year</span><span class="op">$</span><span class="va">Gnrc_Name</span>, <span class="fu">regex</span><span class="op">(</span><span class="st">"Bupropion"</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>         <span class="co"># filter out Contrave</span></span>
+<span>      <span class="op">&amp;</span> <span class="op">!</span><span class="fu">str_detect</span><span class="op">(</span><span class="va">data_year</span><span class="op">$</span><span class="va">Brnd_Name</span>, <span class="fu">regex</span><span class="op">(</span><span class="st">"Embeda"</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,           <span class="co"># filter out Embeda</span></span>
+<span>    <span class="st">"nal"</span>, </span>
+<span>    <span class="va">data_year</span><span class="op">$</span><span class="va">MAT_generic</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># create the MAT_brand variable for naltrexone:</span></span>
+<span>  <span class="co"># if `nal_brands_pattern` not supplied as an argument, starting by creating a vector of naltrexone brand names and concatinating to regex:</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html">is.null</a></span><span class="op">(</span><span class="va">nal_brands_pattern</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">nal_brands</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Depade"</span>, <span class="st">"Naltrexone"</span>, <span class="st">"Revia"</span>, <span class="st">"Vivitrol"</span><span class="op">)</span></span>
+<span>    <span class="va">nal_brands_pattern</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">nal_brands</span>, collapse <span class="op">=</span> <span class="st">"|"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="co"># assign the MAT_brand value:</span></span>
+<span>  <span class="va">data_year</span><span class="op">$</span><span class="va">MAT_brand</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span></span>
+<span>    <span class="fu">str_detect</span><span class="op">(</span></span>
+<span>      <span class="va">data_year</span><span class="op">$</span><span class="va">Brnd_Name</span>, </span>
+<span>      <span class="fu">regex</span><span class="op">(</span><span class="va">nal_brands_pattern</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="st">"nal"</span>, </span>
+<span>    <span class="va">data_year</span><span class="op">$</span><span class="va">MAT_brand</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="co"># create the tx variable using `case_match` as above:</span></span>
+<span><span class="va">data_year</span><span class="op">$</span><span class="va">tx</span> <span class="op">&lt;-</span> <span class="fu">case_match</span><span class="op">(</span></span>
+<span>  <span class="va">data_year</span><span class="op">$</span><span class="va">Brnd_Name</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Bunavail"</span>, <span class="st">"Buprenorphine"</span>, <span class="st">"Buprenorphine Hcl"</span>, <span class="st">"Buprenorphine-Naloxone"</span>, <span class="st">"Sublocade"</span>, <span class="st">"Suboxone"</span>, <span class="st">"Subutex"</span>, <span class="st">"Zubsolv"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"bup_oud"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Belbuca"</span>, <span class="st">"Buprenex"</span>, <span class="st">"Butrans"</span>, <span class="st">"Probuphine"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"bup_pain"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Methadone Hcl"</span>, <span class="st">"Methadose"</span>, <span class="st">"Dolophine Hcl"</span>, <span class="st">"Diskets"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"met_oud"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Methadone Diskets"</span>, <span class="st">"Methadone Intensol"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"met_pain"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Depade"</span>, <span class="st">"Naltrexone"</span>, <span class="st">"Revia"</span>, <span class="st">"Vivitrol"</span>, <span class="st">"Naltrexone Hcl"</span>, <span class="st">"Naltrexone Microspheres"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"nal_oud"</span>,</span>
+<span>    .default <span class="op">=</span> <span class="cn">NA</span></span>
+<span><span class="op">)</span></span>
+<span>  </span>
+<span><span class="co"># return the dataset limited to observations with a value in at least one of the MAT variables or the tx variable:</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="va">data_year</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">data_year</span><span class="op">$</span><span class="va">MAT_generic</span><span class="op">)</span> <span class="op">|</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">data_year</span><span class="op">$</span><span class="va">MAT_brand</span><span class="op">)</span> <span class="op">|</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">data_year</span><span class="op">$</span><span class="va">tx</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="compile-treatment-variables" class="level2"><h2 class="anchored" data-anchor-id="compile-treatment-variables">Compile treatment variables</h2>
+<p>We can now iteratively apply the function to each year of data:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># initialize data_tx as an empty dataset:</span></span>
+<span><span class="va">data_tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># iterate over years 2013-2021:</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">year</span> <span class="kw">in</span> <span class="fl">2013</span><span class="op">:</span><span class="fl">2021</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># generate filename for that year's fst file</span></span>
+<span>  <span class="va">data_year</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"data/"</span>, <span class="va">year</span>, <span class="st">".fst"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="co"># read the fst</span></span>
+<span>    <span class="fu">read_fst</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="co"># apply the treatment function (above)</span></span>
+<span>    <span class="fu">treatment</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="co"># label each entry with the year</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>year <span class="op">=</span> <span class="va">year</span><span class="op">)</span></span>
+<span>  <span class="co"># append the data to the `data_tx` dataset:</span></span>
+<span>  <span class="va">data_tx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">data_tx</span>, <span class="va">data_year</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># cleanup</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/rm.html">rm</a></span><span class="op">(</span><span class="va">data_year</span>, <span class="va">year</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="validate" class="level2"><h2 class="anchored" data-anchor-id="validate">Validate</h2>
+<p>We can now validate the new dataset by tabulating <code>tx</code> vs <code>brand names</code> variables as above:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">data_tx</span><span class="op">$</span><span class="va">Brnd_Name</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">data_tx</span><span class="op">$</span><span class="va">MAT_generic</span><span class="op">)</span><span class="op">]</span>, <span class="va">data_tx</span><span class="op">$</span><span class="va">tx</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">data_tx</span><span class="op">$</span><span class="va">MAT_generic</span><span class="op">)</span><span class="op">]</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># add row for totals:</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/addmargins.html">addmargins</a></span><span class="op">(</span>margin <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>                        
+                         bup_oud bup_pain met_oud met_pain nal_oud
+  Belbuca                      0    11783       0        0       0
+  Bunavail                   394        0       0        0       0
+  Buprenex                     0      182       0        0       0
+  Buprenorphine            19215        0       0        0       0
+  Buprenorphine Hcl        32215        0       0        0       0
+  Buprenorphine-Naloxone   66641        0       0        0       0
+  Butrans                      0    34716       0        0       0
+  Diskets                      0        0       3        0       0
+  Dolophine Hcl                0        0      16        0       0
+  Methadone Hcl                0        0  213145        0       0
+  Methadone Intensol           0        0       0      288       0
+  Methadose                    0        0     147        0       0
+  Naltrexone Hcl               0        0       0        0   39793
+  Sublocade                  396        0       0        0       0
+  Suboxone                 73728        0       0        0       0
+  Vivitrol                     0        0       0        0    3584
+  Zubsolv                   9835        0       0        0       0
+  Sum                     202424    46681  213311      288   43377</code></pre>
+</div>
+</div>
+<p>We can see that two lines correspond to null values for the MAT variables, “Diskets” (a methadone OUD product), “Dolophine Hcl” (a methadone product indicated for OUD or pain), but not “Embeda” (a morphine/naltrexone product filtered out by the treatment function). We will now count the number of observations with NA values for one or more of the MAT variables or the tx variable:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># filter to observations with NA values for one or more of the MAT variables or the tx variable:</span></span>
+<span><span class="va">data_tx</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">MAT_generic</span><span class="op">)</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">MAT_brand</span><span class="op">)</span> <span class="op">|</span> <span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># filter to observations with NA values for generic:</span></span>
+<span><span class="va">data_tx</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">MAT_generic</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># filter to observations with NA values for brand:</span></span>
+<span><span class="va">data_tx</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">MAT_brand</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># filter to observations with NA values for tx:</span></span>
+<span><span class="va">data_tx</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">tx</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+</section></section><section id="providers" class="level1"><h1>Providers</h1>
+<p>First we will extract a list of unique NPIs of the providers in the main dataset:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">NPIS</span> <span class="op">&lt;-</span> <span class="va">data_tx</span><span class="op">$</span><span class="va">Prscrbr_NPI</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html">unique</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We can now iteratively compile the provider dataset</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># initialize data_tx as an empty dataset:</span></span>
+<span><span class="va">prv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># iterate over years 2013-2021:</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">year</span> <span class="kw">in</span> <span class="fl">2013</span><span class="op">:</span><span class="fl">2021</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># generate filename for that year's fst file</span></span>
+<span>  <span class="va">prv_year</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"data/prv/"</span>, <span class="va">year</span>, <span class="st">".fst"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="co"># read the fst</span></span>
+<span>    <span class="fu">read_fst</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="co"># filter providers with matching NPIs</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">PRSCRBR_NPI</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="va">NPIS</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="co"># label each entry with the year</span></span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>year <span class="op">=</span> <span class="va">year</span><span class="op">)</span></span>
+<span>  <span class="co"># append the data to the `data_tx` dataset:</span></span>
+<span>  <span class="va">prv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">prv</span>, <span class="va">prv_year</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># cleanup</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/rm.html">rm</a></span><span class="op">(</span><span class="va">prv_year</span>, <span class="va">year</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="provider-type" class="level2"><h2 class="anchored" data-anchor-id="provider-type">Provider Type</h2>
+<p>Overview of provider types</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_tx</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Prscrbr_Type</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">summarize</span><span class="op">(</span>n <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 142 × 2
+   Prscrbr_Type                              n
+   &lt;chr&gt;                                 &lt;int&gt;
+ 1 Family Practice                      121211
+ 2 Internal Medicine                     86641
+ 3 Nurse Practitioner                    68913
+ 4 Psychiatry                            46873
+ 5 Physician Assistant                   30668
+ 6 Anesthesiology                        23472
+ 7 Physical Medicine and Rehabilitation  21207
+ 8 Pain Management                       18422
+ 9 Interventional Pain Management        16200
+10 General Practice                       8436
+# ℹ 132 more rows</code></pre>
+</div>
+</div>
+<p>Further exploration of provider types:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_tx</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span><span class="op">(</span><span class="va">tx</span> <span class="op">==</span> <span class="st">"bup_oud"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">Prscrbr_Type</span>, <span class="va">year</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">summarize</span><span class="op">(</span></span>
+<span>      n <span class="op">=</span> <span class="fu">n</span><span class="op">(</span><span class="op">)</span>, </span>
+<span>      Supply_yr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">Tot_Day_Suply</span><span class="op">)</span><span class="op">/</span><span class="fl">365</span>, digits<span class="op">=</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>      Supply_per_Provider_yr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">Supply_yr</span><span class="op">/</span><span class="va">n</span>, digits<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">arrange</span><span class="op">(</span><span class="va">year</span>, <span class="fu">desc</span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># select only the top 10 entries of each year</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">year</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">slice_max</span><span class="op">(</span><span class="va">n</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'Prscrbr_Type'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 90 × 5
+# Groups:   year [9]
+   Prscrbr_Type                      year     n Supply_yr Supply_per_Provider_yr
+   &lt;chr&gt;                            &lt;int&gt; &lt;int&gt;     &lt;dbl&gt;                  &lt;dbl&gt;
+ 1 Family Practice                   2013  2559     7994.                    3.1
+ 2 Psychiatry                        2013  2450     7254                     3  
+ 3 Internal Medicine                 2013  1690     5724.                    3.4
+ 4 Psychiatry &amp; Neurology            2013   400      953.                    2.4
+ 5 General Practice                  2013   348     1128.                    3.2
+ 6 Anesthesiology                    2013   329      952.                    2.9
+ 7 Physical Medicine and Rehabilit…  2013   310      935.                    3  
+ 8 Emergency Medicine                2013   274     1076.                    3.9
+ 9 Interventional Pain Management    2013   239      653.                    2.7
+10 Addiction Medicine                2013   179      808.                    4.5
+# ℹ 80 more rows</code></pre>
+</div>
+</div>
+<p>Specify the provider type simplified variable</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_tx</span> <span class="op">&lt;-</span> <span class="va">data_tx</span> <span class="op">|&gt;</span> </span>
+<span>   <span class="fu">mutate</span><span class="op">(</span></span>
+<span>     prv_type <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span>
+<span>       <span class="va">Prscrbr_Type</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Physician Assistant"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"PA"</span>,</span>
+<span>       <span class="va">Prscrbr_Type</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Nurse Practitioner"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"NP"</span>,</span>
+<span>       <span class="va">Prscrbr_Type</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Pharmacist"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"RPh"</span>,</span>
+<span>       <span class="va">Prscrbr_Type</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Family Practice"</span>, <span class="st">"Internal Medicine"</span>, <span class="st">"Family Medicine"</span>, <span class="st">"General Practice"</span>, <span class="st">"Geriatric Medicine"</span>, <span class="st">"Preventive Medicine"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"FP/IM"</span>,</span>
+<span>       <span class="va">Prscrbr_Type</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Anesthesiology"</span>, <span class="st">"Pain Management   "</span>, <span class="st">"Interventional Pain Management"</span>, <span class="st">"Pain Medicine"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Pain"</span>,</span>
+<span>       <span class="va">Prscrbr_Type</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Psychiatry"</span>, <span class="st">"Psychiatry &amp; Neurology"</span>, <span class="st">"Neuropsychiatry"</span>, <span class="st">"Addiction Medicine"</span>, <span class="st">"Counselor"</span><span class="op">)</span> <span class="op">~</span> <span class="st">"Psych"</span>,</span>
+<span>       .default <span class="op">=</span> <span class="st">"Other"</span></span>
+<span>     <span class="op">)</span></span>
+<span>   <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="save-datasets" class="level1"><h1>Save datasets</h1>
+<p>Create final dataset, save datasets, and cleanup:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># save treatment dataset</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span></span>
+<span>  <span class="va">data_tx</span>,</span>
+<span>  file <span class="op">=</span> <span class="st">"dataset/data_tx.RData"</span>,</span>
+<span>  compress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  compression_level <span class="op">=</span> <span class="fl">9</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">write_fst</span><span class="op">(</span></span>
+<span>  <span class="va">data_tx</span>,</span>
+<span>  path <span class="op">=</span> <span class="st">"dataset/data_tx.fst"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># save the prv dataset</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span></span>
+<span>  <span class="va">prv</span>,</span>
+<span>  file <span class="op">=</span> <span class="st">"dataset/prv.RData"</span>,</span>
+<span>  compress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  compression_level <span class="op">=</span> <span class="fl">9</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu">write_fst</span><span class="op">(</span></span>
+<span>  <span class="va">prv</span>,</span>
+<span>  path <span class="op">=</span> <span class="st">"dataset/prv.fst"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># cleanup</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/rm.html">rm</a></span><span class="op">(</span><span class="va">data_tx</span>, <span class="va">prv</span>, <span class="va">treatment</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="session-info" class="level1"><h1>Session Info</h1>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>R version 4.4.0 (2024-04-24)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 22.04.4 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+time zone: America/Vancouver
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] fstcore_0.9.18    data.table_1.15.0 fst_0.9.8         lubridate_1.9.3  
+ [5] forcats_1.0.0     stringr_1.5.1     dplyr_1.1.4       purrr_1.0.2      
+ [9] readr_2.1.5       tidyr_1.3.1       tibble_3.2.1      ggplot2_3.4.4    
+[13] tidyverse_2.0.0  
+
+loaded via a namespace (and not attached):
+ [1] gtable_0.3.4      jsonlite_1.8.8    compiler_4.4.0    Rcpp_1.0.12      
+ [5] tidyselect_1.2.1  parallel_4.4.0    scales_1.3.0      yaml_2.3.8       
+ [9] fastmap_1.1.1     R6_2.5.1          generics_0.1.3    knitr_1.46       
+[13] htmlwidgets_1.6.4 munsell_0.5.0     pillar_1.9.0      tzdb_0.4.0       
+[17] rlang_1.1.3       utf8_1.2.4        stringi_1.8.3     xfun_0.43        
+[21] timechange_0.3.0  cli_3.6.2         withr_3.0.0       magrittr_2.0.3   
+[25] digest_0.6.34     grid_4.4.0        rstudioapi_0.15.0 hms_1.1.3        
+[29] lifecycle_1.0.4   vctrs_0.6.5       evaluate_0.23     glue_1.7.0       
+[33] fansi_1.0.6       colorspace_2.1-0  rmarkdown_2.26    tools_4.4.0      
+[37] pkgconfig_2.0.3   htmltools_0.5.8.1</code></pre>
+</div>
+</div>
+<!-- -->
+
+</section></main><!-- /main column --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb24" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Dataset - Treatment Variable"</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Matthew Hoctor, PharmD"</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> last-modified</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="co">quarto::html_document:</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co">  theme: cerulean</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="co">  highlight: github</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="co">  </span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="an">toc:</span><span class="co"> true</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="an">toc-depth:</span><span class="co"> 4</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="an">toc-location:</span><span class="co"> left</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="an">toc-title:</span><span class="co"> Contents</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="co">  </span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="an">code-fold:</span><span class="co"> show</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="an">code-overflow:</span><span class="co"> wrap</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="an">code-tools:</span><span class="co"> true</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="an">code-link:</span><span class="co"> true</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span><span class="co"> source</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="in">```{r setup, include = FALSE}</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="co"># load libraries:</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fst)              <span class="co"># to load .fst files</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)       <span class="co"># ?is this package necessary?</span></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="co"># library(readxl)           # read excel files</span></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a><span class="co"># library(readODS)          # to read .ods file</span></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a><span class="co"># library(campfin)          # for working with abbreviations commonly found in US place names</span></span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a><span class="co"># library(SUNGEO)           # for batch geocoding from OSM</span></span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a><span class="co"># library(fipio)            # for coords_to_fips() function</span></span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a><span class="co"># library(zipcodeR)         # to search for the zip with the coordinates using search_radius()</span></span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a><span class="co"># library(tidygeocoder)     # for batch geocoding from multiple sources in parallel</span></span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a><span class="co"># library(tidycensus)       # ?county name to FIPS?</span></span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a><span class="fu"># Overview</span></span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a>This project looks to understand the impact of the Comprehensive Addiction and Recovery Act (CARA) of 2016 on patterns of buprenorphine prescribing practices by examining openly available medicare part D data.</span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a>The steps in this page show the data generation process for the treatment variable;  the data be downloaded first, see the <span class="co">[</span><span class="ot">data download</span><span class="co">](https://matthew-hoctor.github.io/BupRx/dl.html)</span> page for specifics.  Subsequent pages show how <span class="co">[</span><span class="ot">geographic</span><span class="co">](https://matthew-hoctor.github.io/BupRx/data_geo.html)</span> and <span class="co">[</span><span class="ot">provider</span><span class="co">](https://matthew-hoctor.github.io/BupRx/data_prv.html)</span> variables are compiled.</span>
+<span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-44"><a href="#cb24-44" aria-hidden="true" tabindex="-1"></a><span class="fu"># Treatment Variable</span></span>
+<span id="cb24-45"><a href="#cb24-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-46"><a href="#cb24-46" aria-hidden="true" tabindex="-1"></a><span class="fu">## Treatment Function</span></span>
+<span id="cb24-47"><a href="#cb24-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-48"><a href="#cb24-48" aria-hidden="true" tabindex="-1"></a>We will now create a function to generate the treatment variable, <span class="in">`tx`</span> for each year of data.  For this function we will use the <span class="in">`data_year`</span> argument to refer to the dataset to be processed, and allow for non-default arguments for brand names to match with the <span class="in">`bup_brands_pattern`</span> variables.  We will generate the <span class="in">`tx`</span> variable, and will also generate <span class="in">`MAT_generic`</span> and <span class="in">`MAT_brand`</span> to serve as a check on the <span class="in">`tx`</span> variable.  The dataset returned will only include entries for which any of these three variables are not NA, thus dramatically reducing the dataset size.</span>
+<span id="cb24-49"><a href="#cb24-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-50"><a href="#cb24-50" aria-hidden="true" tabindex="-1"></a>Sorting each observation according to treatment intention, and assign values to the <span class="in">`tx`</span> variable is the main effect of the function below.  Entries in which buprenorphine was used to treat OUD will be assigned <span class="in">`bup_oud`</span>, entries in which buprenorphine was used to treat pain will be assigned <span class="in">`bup_pain`</span>.  Products indicated for OUD include Sublocade, Brixadi (not available during the years studied), all forms of Buprenorphine Hcl/Naloxone Hcl (Suboxone, Zubsolv, Bunavail, Cassipa, and generic), and Buprenorphine HCl (sublingual, NB that that certain NDCs of this product are reported only as 'Buprenorphine' for the brand and generic names); whereas products indicated for pain include Belbuca (buprenorphine HCl buccal), Buprenex, Butrans, Probuphine (implant, discontinued), generic buprenorphine HCl (parenteral), and generic buprenorphine transdermal patches.  Thus, in the <span class="in">`Brnd_Name`</span> vs <span class="in">`Gnrc_Name`</span> cross-tabulation above, we see that two entries are possibly ambiguous, those in which both variables have the value <span class="in">`Buprenorphine`</span> (which could be generic buprenorphine transdermal patches <span class="co">[</span><span class="ot">pain</span><span class="co">]</span> or buprenorphine HCl sublingual tablets <span class="co">[</span><span class="ot">OUD</span><span class="co">]</span>), and those in which both variables have the variable <span class="in">`Buprenorphine HCl`</span> (which could be parenteral buprenorphine HCl <span class="co">[</span><span class="ot">pain</span><span class="co">]</span>, or buprenorphine HCl sublingual tablets <span class="co">[</span><span class="ot">OUD</span><span class="co">]</span>).  Given that usage of buprenorphine for pain is not common practice in the U.S., we will for the moment assume that these ambiguous entries are for OUD, and will generate the <span class="in">`tx`</span> variable by recoding the <span class="in">`Brnd_Name`</span> variable (although see the <span class="co">[</span><span class="ot">classification</span><span class="co">](https://matthew-hoctor.github.io/BupRx/classification.html)</span> entry, in which indications for these entries are teased apart with the xgboost algorithm based on the prescriber's prescribing patterns).</span>
+<span id="cb24-51"><a href="#cb24-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-52"><a href="#cb24-52" aria-hidden="true" tabindex="-1"></a>Entries in which methadone was used to treat OUD will be assigned <span class="in">`met_oud`</span>, entries in which methadone was used to treat pain will be assigned <span class="in">`met_pain`</span>.  Products indicated for OUD include Dolophine (methadone HCl oral concentrate), Methadone HCl (oral concentrate, oral solution, oral tablet), Methadose (oral concentrate, oral solution, oral tablet), and generic methadone HCl (oral concentrate, oral solution, oral tablet); whereas products indicated for pain include generic methadone HCl (parenteral), Dolophine and Methadone Intensol.  Thus, in the <span class="in">`Brnd_Name`</span> vs <span class="in">`Gnrc_Name`</span> cross-tabulation above, we see that two entries are possibly ambiguous, those in which both variables have the value <span class="in">`Methadone HCl`</span> (which could be parenteral methadone HCl <span class="co">[</span><span class="ot">pain</span><span class="co">]</span>, or methadone HCl oral concentrate, oral solution, Dolophine, or oral tablet <span class="co">[</span><span class="ot">OUD</span><span class="co">]</span>).  Given that usage of methadone for pain is not common practice in the U.S., we will assume that these ambiguous entries are for OUD, and will generate the <span class="in">`tx`</span> variable by recoding the <span class="in">`Brnd_Name`</span> variable.</span>
+<span id="cb24-53"><a href="#cb24-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-56"><a href="#cb24-56" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-57"><a href="#cb24-57" aria-hidden="true" tabindex="-1"></a><span class="co"># create a function to process the data; :</span></span>
+<span id="cb24-58"><a href="#cb24-58" aria-hidden="true" tabindex="-1"></a>treatment <span class="ot">&lt;-</span> <span class="cf">function</span>(data_year, <span class="at">bup_brands_pattern =</span> <span class="cn">NULL</span>, <span class="at">met_brands_pattern =</span> <span class="cn">NULL</span>, <span class="at">nal_brands_pattern =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb24-59"><a href="#cb24-59" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create the MAT_generic variable for buprenorphine:</span></span>
+<span id="cb24-60"><a href="#cb24-60" aria-hidden="true" tabindex="-1"></a>  data_year<span class="sc">$</span>MAT_generic <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb24-61"><a href="#cb24-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(</span>
+<span id="cb24-62"><a href="#cb24-62" aria-hidden="true" tabindex="-1"></a>      data_year<span class="sc">$</span>Gnrc_Name, </span>
+<span id="cb24-63"><a href="#cb24-63" aria-hidden="true" tabindex="-1"></a>      <span class="fu">regex</span>(<span class="st">"bupre"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb24-64"><a href="#cb24-64" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bup"</span>, </span>
+<span id="cb24-65"><a href="#cb24-65" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NA</span>)</span>
+<span id="cb24-66"><a href="#cb24-66" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-67"><a href="#cb24-67" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create the MAT_brand variable for buprenorphine:</span></span>
+<span id="cb24-68"><a href="#cb24-68" aria-hidden="true" tabindex="-1"></a>  <span class="co"># if `bup_brands_pattern` not supplied as an argument, starting by creating a vector of buprenorphine brand names and concatinating to regex:</span></span>
+<span id="cb24-69"><a href="#cb24-69" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(bup_brands_pattern)) {</span>
+<span id="cb24-70"><a href="#cb24-70" aria-hidden="true" tabindex="-1"></a>    bup_brands <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Belbuca"</span>, <span class="st">"Bunavail"</span>, <span class="st">"Buprenex"</span>, <span class="st">"Buprenorphine"</span>, <span class="st">"Butrans"</span>, <span class="st">"Probuphine"</span>, <span class="st">"Sublocade"</span>, <span class="st">"Suboxone"</span>, <span class="st">"Subutex"</span>, <span class="st">"Zubsolv"</span>)</span>
+<span id="cb24-71"><a href="#cb24-71" aria-hidden="true" tabindex="-1"></a>    bup_brands_pattern <span class="ot">&lt;-</span> <span class="fu">paste</span>(bup_brands, <span class="at">collapse =</span> <span class="st">"|"</span>)</span>
+<span id="cb24-72"><a href="#cb24-72" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb24-73"><a href="#cb24-73" aria-hidden="true" tabindex="-1"></a>  <span class="co"># assign the MAT_brand value based on the regex:</span></span>
+<span id="cb24-74"><a href="#cb24-74" aria-hidden="true" tabindex="-1"></a>  data_year<span class="sc">$</span>MAT_brand <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb24-75"><a href="#cb24-75" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(</span>
+<span id="cb24-76"><a href="#cb24-76" aria-hidden="true" tabindex="-1"></a>      data_year<span class="sc">$</span>Brnd_Name, </span>
+<span id="cb24-77"><a href="#cb24-77" aria-hidden="true" tabindex="-1"></a>      <span class="fu">regex</span>(bup_brands_pattern, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb24-78"><a href="#cb24-78" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bup"</span>, </span>
+<span id="cb24-79"><a href="#cb24-79" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NA</span>)</span>
+<span id="cb24-80"><a href="#cb24-80" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-81"><a href="#cb24-81" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create the MAT_generic variable for methadone:</span></span>
+<span id="cb24-82"><a href="#cb24-82" aria-hidden="true" tabindex="-1"></a>  data_year<span class="sc">$</span>MAT_generic <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb24-83"><a href="#cb24-83" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(</span>
+<span id="cb24-84"><a href="#cb24-84" aria-hidden="true" tabindex="-1"></a>      data_year<span class="sc">$</span>Gnrc_Name, </span>
+<span id="cb24-85"><a href="#cb24-85" aria-hidden="true" tabindex="-1"></a>      <span class="fu">regex</span>(<span class="st">"methad"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb24-86"><a href="#cb24-86" aria-hidden="true" tabindex="-1"></a>    <span class="st">"met"</span>, </span>
+<span id="cb24-87"><a href="#cb24-87" aria-hidden="true" tabindex="-1"></a>    data_year<span class="sc">$</span>MAT_generic)</span>
+<span id="cb24-88"><a href="#cb24-88" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-89"><a href="#cb24-89" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create the MAT_brand variable for methadone:</span></span>
+<span id="cb24-90"><a href="#cb24-90" aria-hidden="true" tabindex="-1"></a>  <span class="co"># if `met_brands_pattern` not supplied as an argument, starting by creating a vector of methadone brand names and concatinating to regex:</span></span>
+<span id="cb24-91"><a href="#cb24-91" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(met_brands_pattern)) {</span>
+<span id="cb24-92"><a href="#cb24-92" aria-hidden="true" tabindex="-1"></a>    met_brands <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Dolophine"</span>, <span class="st">"Methadone"</span>, <span class="st">"Methadose"</span>, <span class="st">"Diskets"</span>)</span>
+<span id="cb24-93"><a href="#cb24-93" aria-hidden="true" tabindex="-1"></a>    met_brands_pattern <span class="ot">&lt;-</span> <span class="fu">paste</span>(met_brands, <span class="at">collapse =</span> <span class="st">"|"</span>)</span>
+<span id="cb24-94"><a href="#cb24-94" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb24-95"><a href="#cb24-95" aria-hidden="true" tabindex="-1"></a>  <span class="co"># assign the MAT_brand value:</span></span>
+<span id="cb24-96"><a href="#cb24-96" aria-hidden="true" tabindex="-1"></a>  data_year<span class="sc">$</span>MAT_brand <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb24-97"><a href="#cb24-97" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(</span>
+<span id="cb24-98"><a href="#cb24-98" aria-hidden="true" tabindex="-1"></a>      data_year<span class="sc">$</span>Brnd_Name, </span>
+<span id="cb24-99"><a href="#cb24-99" aria-hidden="true" tabindex="-1"></a>      <span class="fu">regex</span>(met_brands_pattern, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb24-100"><a href="#cb24-100" aria-hidden="true" tabindex="-1"></a>    <span class="st">"met"</span>, </span>
+<span id="cb24-101"><a href="#cb24-101" aria-hidden="true" tabindex="-1"></a>    data_year<span class="sc">$</span>MAT_brand)</span>
+<span id="cb24-102"><a href="#cb24-102" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-103"><a href="#cb24-103" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create the MAT_generic variable for naltrexone:</span></span>
+<span id="cb24-104"><a href="#cb24-104" aria-hidden="true" tabindex="-1"></a>  data_year<span class="sc">$</span>MAT_generic <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb24-105"><a href="#cb24-105" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(</span>
+<span id="cb24-106"><a href="#cb24-106" aria-hidden="true" tabindex="-1"></a>      data_year<span class="sc">$</span>Gnrc_Name, </span>
+<span id="cb24-107"><a href="#cb24-107" aria-hidden="true" tabindex="-1"></a>      <span class="fu">regex</span>(<span class="st">"naltrex"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb24-108"><a href="#cb24-108" aria-hidden="true" tabindex="-1"></a>      <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">str_detect</span>(data_year<span class="sc">$</span>Gnrc_Name, <span class="fu">regex</span>(<span class="st">"Methylnaltrexone"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>))  <span class="co"># filter out methylnaltrexone</span></span>
+<span id="cb24-109"><a href="#cb24-109" aria-hidden="true" tabindex="-1"></a>      <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">str_detect</span>(data_year<span class="sc">$</span>Gnrc_Name, <span class="fu">regex</span>(<span class="st">"Bupropion"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>))         <span class="co"># filter out Contrave</span></span>
+<span id="cb24-110"><a href="#cb24-110" aria-hidden="true" tabindex="-1"></a>      <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">str_detect</span>(data_year<span class="sc">$</span>Brnd_Name, <span class="fu">regex</span>(<span class="st">"Embeda"</span>, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)),           <span class="co"># filter out Embeda</span></span>
+<span id="cb24-111"><a href="#cb24-111" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nal"</span>, </span>
+<span id="cb24-112"><a href="#cb24-112" aria-hidden="true" tabindex="-1"></a>    data_year<span class="sc">$</span>MAT_generic)</span>
+<span id="cb24-113"><a href="#cb24-113" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-114"><a href="#cb24-114" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create the MAT_brand variable for naltrexone:</span></span>
+<span id="cb24-115"><a href="#cb24-115" aria-hidden="true" tabindex="-1"></a>  <span class="co"># if `nal_brands_pattern` not supplied as an argument, starting by creating a vector of naltrexone brand names and concatinating to regex:</span></span>
+<span id="cb24-116"><a href="#cb24-116" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(nal_brands_pattern)) {</span>
+<span id="cb24-117"><a href="#cb24-117" aria-hidden="true" tabindex="-1"></a>    nal_brands <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Depade"</span>, <span class="st">"Naltrexone"</span>, <span class="st">"Revia"</span>, <span class="st">"Vivitrol"</span>)</span>
+<span id="cb24-118"><a href="#cb24-118" aria-hidden="true" tabindex="-1"></a>    nal_brands_pattern <span class="ot">&lt;-</span> <span class="fu">paste</span>(nal_brands, <span class="at">collapse =</span> <span class="st">"|"</span>)</span>
+<span id="cb24-119"><a href="#cb24-119" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb24-120"><a href="#cb24-120" aria-hidden="true" tabindex="-1"></a>  <span class="co"># assign the MAT_brand value:</span></span>
+<span id="cb24-121"><a href="#cb24-121" aria-hidden="true" tabindex="-1"></a>  data_year<span class="sc">$</span>MAT_brand <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(</span>
+<span id="cb24-122"><a href="#cb24-122" aria-hidden="true" tabindex="-1"></a>    <span class="fu">str_detect</span>(</span>
+<span id="cb24-123"><a href="#cb24-123" aria-hidden="true" tabindex="-1"></a>      data_year<span class="sc">$</span>Brnd_Name, </span>
+<span id="cb24-124"><a href="#cb24-124" aria-hidden="true" tabindex="-1"></a>      <span class="fu">regex</span>(nal_brands_pattern, <span class="at">ignore_case =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb24-125"><a href="#cb24-125" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nal"</span>, </span>
+<span id="cb24-126"><a href="#cb24-126" aria-hidden="true" tabindex="-1"></a>    data_year<span class="sc">$</span>MAT_brand)</span>
+<span id="cb24-127"><a href="#cb24-127" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-128"><a href="#cb24-128" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create the tx variable using `case_match` as above:</span></span>
+<span id="cb24-129"><a href="#cb24-129" aria-hidden="true" tabindex="-1"></a>data_year<span class="sc">$</span>tx <span class="ot">&lt;-</span> <span class="fu">case_match</span>(</span>
+<span id="cb24-130"><a href="#cb24-130" aria-hidden="true" tabindex="-1"></a>  data_year<span class="sc">$</span>Brnd_Name,</span>
+<span id="cb24-131"><a href="#cb24-131" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"Bunavail"</span>, <span class="st">"Buprenorphine"</span>, <span class="st">"Buprenorphine Hcl"</span>, <span class="st">"Buprenorphine-Naloxone"</span>, <span class="st">"Sublocade"</span>, <span class="st">"Suboxone"</span>, <span class="st">"Subutex"</span>, <span class="st">"Zubsolv"</span>) <span class="sc">~</span> <span class="st">"bup_oud"</span>,</span>
+<span id="cb24-132"><a href="#cb24-132" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"Belbuca"</span>, <span class="st">"Buprenex"</span>, <span class="st">"Butrans"</span>, <span class="st">"Probuphine"</span>) <span class="sc">~</span> <span class="st">"bup_pain"</span>,</span>
+<span id="cb24-133"><a href="#cb24-133" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"Methadone Hcl"</span>, <span class="st">"Methadose"</span>, <span class="st">"Dolophine Hcl"</span>, <span class="st">"Diskets"</span>) <span class="sc">~</span> <span class="st">"met_oud"</span>,</span>
+<span id="cb24-134"><a href="#cb24-134" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"Methadone Diskets"</span>, <span class="st">"Methadone Intensol"</span>) <span class="sc">~</span> <span class="st">"met_pain"</span>,</span>
+<span id="cb24-135"><a href="#cb24-135" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"Depade"</span>, <span class="st">"Naltrexone"</span>, <span class="st">"Revia"</span>, <span class="st">"Vivitrol"</span>, <span class="st">"Naltrexone Hcl"</span>, <span class="st">"Naltrexone Microspheres"</span>) <span class="sc">~</span> <span class="st">"nal_oud"</span>,</span>
+<span id="cb24-136"><a href="#cb24-136" aria-hidden="true" tabindex="-1"></a>    <span class="at">.default =</span> <span class="cn">NA</span></span>
+<span id="cb24-137"><a href="#cb24-137" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-138"><a href="#cb24-138" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb24-139"><a href="#cb24-139" aria-hidden="true" tabindex="-1"></a><span class="co"># return the dataset limited to observations with a value in at least one of the MAT variables or the tx variable:</span></span>
+<span id="cb24-140"><a href="#cb24-140" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(data_year[<span class="sc">!</span><span class="fu">is.na</span>(data_year<span class="sc">$</span>MAT_generic) <span class="sc">|</span> <span class="sc">!</span><span class="fu">is.na</span>(data_year<span class="sc">$</span>MAT_brand) <span class="sc">|</span> <span class="sc">!</span><span class="fu">is.na</span>(data_year<span class="sc">$</span>tx), ])</span>
+<span id="cb24-141"><a href="#cb24-141" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-142"><a href="#cb24-142" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-143"><a href="#cb24-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-144"><a href="#cb24-144" aria-hidden="true" tabindex="-1"></a><span class="fu">## Compile treatment variables</span></span>
+<span id="cb24-145"><a href="#cb24-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-146"><a href="#cb24-146" aria-hidden="true" tabindex="-1"></a>We can now iteratively apply the function to each year of data:</span>
+<span id="cb24-147"><a href="#cb24-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-150"><a href="#cb24-150" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-151"><a href="#cb24-151" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: false</span></span>
+<span id="cb24-152"><a href="#cb24-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-153"><a href="#cb24-153" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize data_tx as an empty dataset:</span></span>
+<span id="cb24-154"><a href="#cb24-154" aria-hidden="true" tabindex="-1"></a>data_tx <span class="ot">&lt;-</span> <span class="fu">data.frame</span>()</span>
+<span id="cb24-155"><a href="#cb24-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-156"><a href="#cb24-156" aria-hidden="true" tabindex="-1"></a><span class="co"># iterate over years 2013-2021:</span></span>
+<span id="cb24-157"><a href="#cb24-157" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (year <span class="cf">in</span> <span class="dv">2013</span><span class="sc">:</span><span class="dv">2021</span>) {</span>
+<span id="cb24-158"><a href="#cb24-158" aria-hidden="true" tabindex="-1"></a>  <span class="co"># generate filename for that year's fst file</span></span>
+<span id="cb24-159"><a href="#cb24-159" aria-hidden="true" tabindex="-1"></a>  data_year <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"data/"</span>, year, <span class="st">".fst"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-160"><a href="#cb24-160" aria-hidden="true" tabindex="-1"></a>    <span class="co"># read the fst</span></span>
+<span id="cb24-161"><a href="#cb24-161" aria-hidden="true" tabindex="-1"></a>    <span class="fu">read_fst</span>() <span class="sc">|&gt;</span></span>
+<span id="cb24-162"><a href="#cb24-162" aria-hidden="true" tabindex="-1"></a>    <span class="co"># apply the treatment function (above)</span></span>
+<span id="cb24-163"><a href="#cb24-163" aria-hidden="true" tabindex="-1"></a>    <span class="fu">treatment</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb24-164"><a href="#cb24-164" aria-hidden="true" tabindex="-1"></a>    <span class="co"># label each entry with the year</span></span>
+<span id="cb24-165"><a href="#cb24-165" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">year =</span> year)</span>
+<span id="cb24-166"><a href="#cb24-166" aria-hidden="true" tabindex="-1"></a>  <span class="co"># append the data to the `data_tx` dataset:</span></span>
+<span id="cb24-167"><a href="#cb24-167" aria-hidden="true" tabindex="-1"></a>  data_tx <span class="ot">&lt;-</span> <span class="fu">rbind</span>(data_tx, data_year)</span>
+<span id="cb24-168"><a href="#cb24-168" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-169"><a href="#cb24-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-170"><a href="#cb24-170" aria-hidden="true" tabindex="-1"></a><span class="co"># cleanup</span></span>
+<span id="cb24-171"><a href="#cb24-171" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(data_year, year)</span>
+<span id="cb24-172"><a href="#cb24-172" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-173"><a href="#cb24-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-174"><a href="#cb24-174" aria-hidden="true" tabindex="-1"></a><span class="fu">## Validate</span></span>
+<span id="cb24-175"><a href="#cb24-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-176"><a href="#cb24-176" aria-hidden="true" tabindex="-1"></a>We can now validate the new dataset by tabulating <span class="in">`tx`</span> vs <span class="in">`brand names`</span> variables as above:</span>
+<span id="cb24-177"><a href="#cb24-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-180"><a href="#cb24-180" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-181"><a href="#cb24-181" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(data_tx<span class="sc">$</span>Brnd_Name[<span class="sc">!</span><span class="fu">is.na</span>(data_tx<span class="sc">$</span>MAT_generic)], data_tx<span class="sc">$</span>tx[<span class="sc">!</span><span class="fu">is.na</span>(data_tx<span class="sc">$</span>MAT_generic)]) <span class="sc">|&gt;</span></span>
+<span id="cb24-182"><a href="#cb24-182" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add row for totals:</span></span>
+<span id="cb24-183"><a href="#cb24-183" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addmargins</span>(<span class="at">margin =</span> <span class="dv">1</span>) </span>
+<span id="cb24-184"><a href="#cb24-184" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-185"><a href="#cb24-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-186"><a href="#cb24-186" aria-hidden="true" tabindex="-1"></a>We can see that two lines correspond to null values for the MAT variables, "Diskets" (a methadone OUD product), "Dolophine Hcl" (a methadone product indicated for OUD or pain), but not "Embeda" (a morphine/naltrexone product filtered out by the treatment function).  We will now count the number of observations with NA values for one or more of the MAT variables or the tx variable:</span>
+<span id="cb24-187"><a href="#cb24-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-190"><a href="#cb24-190" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-191"><a href="#cb24-191" aria-hidden="true" tabindex="-1"></a><span class="co"># filter to observations with NA values for one or more of the MAT variables or the tx variable:</span></span>
+<span id="cb24-192"><a href="#cb24-192" aria-hidden="true" tabindex="-1"></a>data_tx <span class="sc">|&gt;</span></span>
+<span id="cb24-193"><a href="#cb24-193" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(MAT_generic) <span class="sc">|</span> <span class="fu">is.na</span>(MAT_brand) <span class="sc">|</span> <span class="fu">is.na</span>(tx)) <span class="sc">|&gt;</span></span>
+<span id="cb24-194"><a href="#cb24-194" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
+<span id="cb24-195"><a href="#cb24-195" aria-hidden="true" tabindex="-1"></a><span class="co"># filter to observations with NA values for generic:</span></span>
+<span id="cb24-196"><a href="#cb24-196" aria-hidden="true" tabindex="-1"></a>data_tx <span class="sc">|&gt;</span></span>
+<span id="cb24-197"><a href="#cb24-197" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(MAT_generic)) <span class="sc">|&gt;</span></span>
+<span id="cb24-198"><a href="#cb24-198" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
+<span id="cb24-199"><a href="#cb24-199" aria-hidden="true" tabindex="-1"></a><span class="co"># filter to observations with NA values for brand:</span></span>
+<span id="cb24-200"><a href="#cb24-200" aria-hidden="true" tabindex="-1"></a>data_tx <span class="sc">|&gt;</span></span>
+<span id="cb24-201"><a href="#cb24-201" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(MAT_brand)) <span class="sc">|&gt;</span></span>
+<span id="cb24-202"><a href="#cb24-202" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
+<span id="cb24-203"><a href="#cb24-203" aria-hidden="true" tabindex="-1"></a><span class="co"># filter to observations with NA values for tx:</span></span>
+<span id="cb24-204"><a href="#cb24-204" aria-hidden="true" tabindex="-1"></a>data_tx <span class="sc">|&gt;</span></span>
+<span id="cb24-205"><a href="#cb24-205" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(tx)) <span class="sc">|&gt;</span></span>
+<span id="cb24-206"><a href="#cb24-206" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span>
+<span id="cb24-207"><a href="#cb24-207" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-208"><a href="#cb24-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-209"><a href="#cb24-209" aria-hidden="true" tabindex="-1"></a><span class="fu"># Providers</span></span>
+<span id="cb24-210"><a href="#cb24-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-211"><a href="#cb24-211" aria-hidden="true" tabindex="-1"></a>First we will extract a list of unique NPIs of the providers in the main dataset:</span>
+<span id="cb24-212"><a href="#cb24-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-215"><a href="#cb24-215" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-216"><a href="#cb24-216" aria-hidden="true" tabindex="-1"></a>NPIS <span class="ot">&lt;-</span> data_tx<span class="sc">$</span>Prscrbr_NPI <span class="sc">|&gt;</span></span>
+<span id="cb24-217"><a href="#cb24-217" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>()</span>
+<span id="cb24-218"><a href="#cb24-218" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-219"><a href="#cb24-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-220"><a href="#cb24-220" aria-hidden="true" tabindex="-1"></a>We can now iteratively compile the provider dataset</span>
+<span id="cb24-221"><a href="#cb24-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-224"><a href="#cb24-224" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-225"><a href="#cb24-225" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: false</span></span>
+<span id="cb24-226"><a href="#cb24-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-227"><a href="#cb24-227" aria-hidden="true" tabindex="-1"></a><span class="co"># initialize data_tx as an empty dataset:</span></span>
+<span id="cb24-228"><a href="#cb24-228" aria-hidden="true" tabindex="-1"></a>prv <span class="ot">&lt;-</span> <span class="fu">data.frame</span>()</span>
+<span id="cb24-229"><a href="#cb24-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-230"><a href="#cb24-230" aria-hidden="true" tabindex="-1"></a><span class="co"># iterate over years 2013-2021:</span></span>
+<span id="cb24-231"><a href="#cb24-231" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (year <span class="cf">in</span> <span class="dv">2013</span><span class="sc">:</span><span class="dv">2021</span>) {</span>
+<span id="cb24-232"><a href="#cb24-232" aria-hidden="true" tabindex="-1"></a>  <span class="co"># generate filename for that year's fst file</span></span>
+<span id="cb24-233"><a href="#cb24-233" aria-hidden="true" tabindex="-1"></a>  prv_year <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"data/prv/"</span>, year, <span class="st">".fst"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-234"><a href="#cb24-234" aria-hidden="true" tabindex="-1"></a>    <span class="co"># read the fst</span></span>
+<span id="cb24-235"><a href="#cb24-235" aria-hidden="true" tabindex="-1"></a>    <span class="fu">read_fst</span>() <span class="sc">|&gt;</span></span>
+<span id="cb24-236"><a href="#cb24-236" aria-hidden="true" tabindex="-1"></a>    <span class="co"># filter providers with matching NPIs</span></span>
+<span id="cb24-237"><a href="#cb24-237" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(PRSCRBR_NPI <span class="sc">%in%</span> NPIS) <span class="sc">|&gt;</span></span>
+<span id="cb24-238"><a href="#cb24-238" aria-hidden="true" tabindex="-1"></a>    <span class="co"># label each entry with the year</span></span>
+<span id="cb24-239"><a href="#cb24-239" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">year =</span> year)</span>
+<span id="cb24-240"><a href="#cb24-240" aria-hidden="true" tabindex="-1"></a>  <span class="co"># append the data to the `data_tx` dataset:</span></span>
+<span id="cb24-241"><a href="#cb24-241" aria-hidden="true" tabindex="-1"></a>  prv <span class="ot">&lt;-</span> <span class="fu">rbind</span>(prv, prv_year)</span>
+<span id="cb24-242"><a href="#cb24-242" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-243"><a href="#cb24-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-244"><a href="#cb24-244" aria-hidden="true" tabindex="-1"></a><span class="co"># cleanup</span></span>
+<span id="cb24-245"><a href="#cb24-245" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(prv_year, year)</span>
+<span id="cb24-246"><a href="#cb24-246" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-247"><a href="#cb24-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-248"><a href="#cb24-248" aria-hidden="true" tabindex="-1"></a><span class="fu">## Provider Type</span></span>
+<span id="cb24-249"><a href="#cb24-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-250"><a href="#cb24-250" aria-hidden="true" tabindex="-1"></a>Overview of provider types</span>
+<span id="cb24-251"><a href="#cb24-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-254"><a href="#cb24-254" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-255"><a href="#cb24-255" aria-hidden="true" tabindex="-1"></a>data_tx <span class="sc">|&gt;</span> </span>
+<span id="cb24-256"><a href="#cb24-256" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Prscrbr_Type) <span class="sc">|&gt;</span> </span>
+<span id="cb24-257"><a href="#cb24-257" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb24-258"><a href="#cb24-258" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n))</span>
+<span id="cb24-259"><a href="#cb24-259" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-260"><a href="#cb24-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-261"><a href="#cb24-261" aria-hidden="true" tabindex="-1"></a>Further exploration of provider types:</span>
+<span id="cb24-262"><a href="#cb24-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-265"><a href="#cb24-265" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-266"><a href="#cb24-266" aria-hidden="true" tabindex="-1"></a>data_tx <span class="sc">|&gt;</span> </span>
+<span id="cb24-267"><a href="#cb24-267" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(tx <span class="sc">==</span> <span class="st">"bup_oud"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-268"><a href="#cb24-268" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Prscrbr_Type, year) <span class="sc">|&gt;</span> </span>
+<span id="cb24-269"><a href="#cb24-269" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb24-270"><a href="#cb24-270" aria-hidden="true" tabindex="-1"></a>      <span class="at">n =</span> <span class="fu">n</span>(), </span>
+<span id="cb24-271"><a href="#cb24-271" aria-hidden="true" tabindex="-1"></a>      <span class="at">Supply_yr =</span> <span class="fu">round</span>(<span class="fu">sum</span>(Tot_Day_Suply)<span class="sc">/</span><span class="dv">365</span>, <span class="at">digits=</span><span class="dv">1</span>),</span>
+<span id="cb24-272"><a href="#cb24-272" aria-hidden="true" tabindex="-1"></a>      <span class="at">Supply_per_Provider_yr =</span> <span class="fu">round</span>(Supply_yr<span class="sc">/</span>n, <span class="at">digits=</span><span class="dv">1</span>)</span>
+<span id="cb24-273"><a href="#cb24-273" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb24-274"><a href="#cb24-274" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(year, <span class="fu">desc</span>(n)) <span class="sc">|&gt;</span></span>
+<span id="cb24-275"><a href="#cb24-275" aria-hidden="true" tabindex="-1"></a>  <span class="co"># select only the top 10 entries of each year</span></span>
+<span id="cb24-276"><a href="#cb24-276" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year) <span class="sc">|&gt;</span></span>
+<span id="cb24-277"><a href="#cb24-277" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(n, <span class="at">n =</span> <span class="dv">10</span>)</span>
+<span id="cb24-278"><a href="#cb24-278" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-279"><a href="#cb24-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-280"><a href="#cb24-280" aria-hidden="true" tabindex="-1"></a>Specify the provider type simplified variable</span>
+<span id="cb24-281"><a href="#cb24-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-284"><a href="#cb24-284" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-285"><a href="#cb24-285" aria-hidden="true" tabindex="-1"></a>data_tx <span class="ot">&lt;-</span> data_tx <span class="sc">|&gt;</span> </span>
+<span id="cb24-286"><a href="#cb24-286" aria-hidden="true" tabindex="-1"></a>   <span class="fu">mutate</span>(</span>
+<span id="cb24-287"><a href="#cb24-287" aria-hidden="true" tabindex="-1"></a>     <span class="at">prv_type =</span> <span class="fu">case_when</span>(</span>
+<span id="cb24-288"><a href="#cb24-288" aria-hidden="true" tabindex="-1"></a>       Prscrbr_Type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Physician Assistant"</span>) <span class="sc">~</span> <span class="st">"PA"</span>,</span>
+<span id="cb24-289"><a href="#cb24-289" aria-hidden="true" tabindex="-1"></a>       Prscrbr_Type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Nurse Practitioner"</span>) <span class="sc">~</span> <span class="st">"NP"</span>,</span>
+<span id="cb24-290"><a href="#cb24-290" aria-hidden="true" tabindex="-1"></a>       Prscrbr_Type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Pharmacist"</span>) <span class="sc">~</span> <span class="st">"RPh"</span>,</span>
+<span id="cb24-291"><a href="#cb24-291" aria-hidden="true" tabindex="-1"></a>       Prscrbr_Type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Family Practice"</span>, <span class="st">"Internal Medicine"</span>, <span class="st">"Family Medicine"</span>, <span class="st">"General Practice"</span>, <span class="st">"Geriatric Medicine"</span>, <span class="st">"Preventive Medicine"</span>) <span class="sc">~</span> <span class="st">"FP/IM"</span>,</span>
+<span id="cb24-292"><a href="#cb24-292" aria-hidden="true" tabindex="-1"></a>       Prscrbr_Type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Anesthesiology"</span>, <span class="st">"Pain Management   "</span>, <span class="st">"Interventional Pain Management"</span>, <span class="st">"Pain Medicine"</span>) <span class="sc">~</span> <span class="st">"Pain"</span>,</span>
+<span id="cb24-293"><a href="#cb24-293" aria-hidden="true" tabindex="-1"></a>       Prscrbr_Type <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Psychiatry"</span>, <span class="st">"Psychiatry &amp; Neurology"</span>, <span class="st">"Neuropsychiatry"</span>, <span class="st">"Addiction Medicine"</span>, <span class="st">"Counselor"</span>) <span class="sc">~</span> <span class="st">"Psych"</span>,</span>
+<span id="cb24-294"><a href="#cb24-294" aria-hidden="true" tabindex="-1"></a>       <span class="at">.default =</span> <span class="st">"Other"</span></span>
+<span id="cb24-295"><a href="#cb24-295" aria-hidden="true" tabindex="-1"></a>     )</span>
+<span id="cb24-296"><a href="#cb24-296" aria-hidden="true" tabindex="-1"></a>   )</span>
+<span id="cb24-297"><a href="#cb24-297" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-298"><a href="#cb24-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-299"><a href="#cb24-299" aria-hidden="true" tabindex="-1"></a><span class="fu"># Save datasets</span></span>
+<span id="cb24-300"><a href="#cb24-300" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-301"><a href="#cb24-301" aria-hidden="true" tabindex="-1"></a>Create final dataset, save datasets, and cleanup:</span>
+<span id="cb24-302"><a href="#cb24-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-305"><a href="#cb24-305" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-306"><a href="#cb24-306" aria-hidden="true" tabindex="-1"></a><span class="co"># save treatment dataset</span></span>
+<span id="cb24-307"><a href="#cb24-307" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(</span>
+<span id="cb24-308"><a href="#cb24-308" aria-hidden="true" tabindex="-1"></a>  data_tx,</span>
+<span id="cb24-309"><a href="#cb24-309" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"dataset/data_tx.RData"</span>,</span>
+<span id="cb24-310"><a href="#cb24-310" aria-hidden="true" tabindex="-1"></a>  <span class="at">compress =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb24-311"><a href="#cb24-311" aria-hidden="true" tabindex="-1"></a>  <span class="at">compression_level =</span> <span class="dv">9</span></span>
+<span id="cb24-312"><a href="#cb24-312" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-313"><a href="#cb24-313" aria-hidden="true" tabindex="-1"></a><span class="fu">write_fst</span>(</span>
+<span id="cb24-314"><a href="#cb24-314" aria-hidden="true" tabindex="-1"></a>  data_tx,</span>
+<span id="cb24-315"><a href="#cb24-315" aria-hidden="true" tabindex="-1"></a>  <span class="at">path =</span> <span class="st">"dataset/data_tx.fst"</span></span>
+<span id="cb24-316"><a href="#cb24-316" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-317"><a href="#cb24-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-318"><a href="#cb24-318" aria-hidden="true" tabindex="-1"></a><span class="co"># save the prv dataset</span></span>
+<span id="cb24-319"><a href="#cb24-319" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(</span>
+<span id="cb24-320"><a href="#cb24-320" aria-hidden="true" tabindex="-1"></a>  prv,</span>
+<span id="cb24-321"><a href="#cb24-321" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"dataset/prv.RData"</span>,</span>
+<span id="cb24-322"><a href="#cb24-322" aria-hidden="true" tabindex="-1"></a>  <span class="at">compress =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb24-323"><a href="#cb24-323" aria-hidden="true" tabindex="-1"></a>  <span class="at">compression_level =</span> <span class="dv">9</span></span>
+<span id="cb24-324"><a href="#cb24-324" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-325"><a href="#cb24-325" aria-hidden="true" tabindex="-1"></a><span class="fu">write_fst</span>(</span>
+<span id="cb24-326"><a href="#cb24-326" aria-hidden="true" tabindex="-1"></a>  prv,</span>
+<span id="cb24-327"><a href="#cb24-327" aria-hidden="true" tabindex="-1"></a>  <span class="at">path =</span> <span class="st">"dataset/prv.fst"</span></span>
+<span id="cb24-328"><a href="#cb24-328" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-329"><a href="#cb24-329" aria-hidden="true" tabindex="-1"></a><span class="co"># cleanup</span></span>
+<span id="cb24-330"><a href="#cb24-330" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(data_tx, prv, treatment)</span>
+<span id="cb24-331"><a href="#cb24-331" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-332"><a href="#cb24-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-333"><a href="#cb24-333" aria-hidden="true" tabindex="-1"></a><span class="fu"># Session Info</span></span>
+<span id="cb24-334"><a href="#cb24-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-337"><a href="#cb24-337" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb24-338"><a href="#cb24-338" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb24-339"><a href="#cb24-339" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>
