@@ -1,0 +1,892 @@
+---
+title: "Dataset - Geocoding to County"
+author: "Matthew Hoctor, PharmD"
+date: last-modified
+
+quarto::html_document:
+  theme: cerulean
+  highlight: github
+
+toc: true
+toc-depth: 4
+toc-location: left
+toc-title: Contents
+
+code-fold: show
+code-overflow: wrap
+code-tools: true
+code-link: true
+
+editor: source
+---
+
+```{r}
+#| label: setup
+#| output: false
+## load libraries:
+library(tidyverse)      # dplyr, lubridate, stringr, etc, etc, etc
+library(janitor)        # adorn_totals()
+library(fst)            # read/write .fst files
+library(data.table)     # ?is this package necessary?
+library(readxl)         # read excel files
+# library(readODS)      # to read .ods file
+# library(campfin)      # for working with abbreviations in US place names
+# library(SUNGEO)       # for batch geocoding from OSM
+library(fipio)          # coords_to_fips()
+library(zipcodeR)       # for finding zipcode centroid coords
+library(tidygeocoder)   # for batch geocoding from multiple sources in parallel
+# library(tidycensus)   # ?county name to FIPS?
+library(tigris)         # counties(): download year-specific county data
+
+# thanks to Josh O'Brien for the following functions:
+# https://stackoverflow.com/questions/26539441/remove-null-elements-from-list-of-lists
+## A helper function that tests whether an object is either NULL _or_ 
+## a list of NULLs
+is.NullOb <- function(x) is.null(x) | all(sapply(x, is.null))
+## Recursively step down into list, removing all such objects 
+rmNullObs <- function(x) {
+   x <- Filter(Negate(is.NullOb), x)
+   lapply(x, function(x) if (is.list(x)) rmNullObs(x) else x)
+}
+```
+
+# Overview
+
+This project looks to understand the impact of the Comprehensive Addiction and Recovery Act (CARA) of 2016 on patterns of buprenorphine prescribing practices by examining openly available medicare part D data.
+
+The steps in this page require that the data be downloaded first (see the [data download](https://matthew-hoctor.github.io/BupRx/dl.html) page), and for the [treatment variables](https://matthew-hoctor.github.io/BupRx/dataset_tx.html) to be compiled.  The scripts below show the data generation process.
+
+Using the USGS Populated Places dataset, we will attempt to convert the city/state data from the dataset into a a FIPS code, which will be used to lookup the CDC's 2013 Urban-Rural Classification using the following steps:
+
+ - The USGS dataset (which can be found as a text file within their Geographic Names Information System (GNIS) [here](https://www.usgs.gov/us-board-on-geographic-names/download-gnis-data)) contains several variables including the state name/FIPS, the 'map name' (which is often the city name), and the county name/FIPS.  The first step will be to lookup the city/state in this dataset and retrieve the full FIPS.
+ - Lookup rural-urban clssification: For this step we can use the FIPS code to lookup the CDC's [2013 Urban-Rural Classification Scheme for Counties](https://www.cdc.gov/nchs/data_access/urban_rural.htm); specifically using the [NCHSurbruralcodes Spreadsheet](https://www.cdc.gov/nchs/data/data_acces_files/NCHSURCodes2013.xlsx) which contains the FIPS codes and rural-urban classifications for each county in the US.
+
+NB the CDC provides a helpful summary of [County Geography Changes: 1990-present](https://www.cdc.gov/nchs/nvss/bridged_race/county_geography-_changes1990-present.pdf).
+
+# Datasets
+
+## Load Data
+
+```{r}
+#| label: load_datasets
+#| output: false
+# Load the dataset from the prior step:
+load(file = "dataset/data_tx.RData")
+
+# Load the provider data:
+prv <- read_fst(path = "dataset/prv.fst")
+
+# Download the US counties 2013 dataset from the Census Bureau using the `tigris` package:
+counties_2013 <- counties(year = 2013, cb = TRUE) |>
+  mutate(fips = paste0(STATEFP, COUNTYFP)) |>
+  relocate(fips, .after = COUNTYFP)
+
+# Load the USGS Populated Places dataset:
+usgs <- read_delim(
+  "data/Text/PopulatedPlaces_National.txt",
+  delim = "|", # the file is pipe-delimited
+  col_names = TRUE,
+  progress = FALSE)
+```
+
+Prepping a 'wide' dataset (the extensive munging is to create a dataset in which each row uniquely maps a state/name pair to a county, see 'USGS Diagnostics' section):
+
+```{r}
+#| label: usgs_wide
+usgs_wide <- usgs |>
+  select(state_numeric, county_numeric, map_name, feature_name) |>
+  # lengthen the dataset by map name and feature name
+  pivot_longer(
+    cols = c(map_name, feature_name),
+    names_to = "type",
+    values_to = "name"
+  ) |>
+  # create new vars to count the 'type' of name in the row
+  mutate(name = str_to_lower(name)) |>
+  select(-type) |>
+  # add fips0 variable
+  mutate(fips0 = paste0(state_numeric, county_numeric)) |>
+  select(-county_numeric) |>
+  # tabulate number of FIPS codes for each state/name pair:
+  group_by(state_numeric, name) |>
+  mutate(n_fips = length(unique(fips0))) |>
+  ungroup() |>
+  # select only rows in which the state/name pair correspond to a single FIPS (i.e. n_fips == 1)
+  filter(n_fips == 1) |>
+  # remove n_fips
+  select(-n_fips) |>
+  # retain only unique entries
+  distinct() |>
+  # select counties present in 2013 only
+  filter(fips0 %in% counties_2013$fips)
+```
+
+## Gelocation dataset
+
+The following code will create a reduced dataset without entries in the excluded locales described above; NB this step reduces the number of observations in the dataset.  A number of typos are corrected and the missing values from the provider dataset are also tabulated:
+
+```{r}
+#| label: geolocation_dataset
+data_fips <- data_tx |>
+  # filter out Puerto Rico, Virgin Islands, and Guam; these are not in NCHSUR  (codes 66, 72, 78):
+  filter(Prscrbr_State_FIPS != "66" & Prscrbr_State_FIPS != "72" & Prscrbr_State_FIPS != "78") |>
+  # filter out military mail codes (codes AA, AE, AP); other codes (ZZ, XX):
+  filter(!str_detect(Prscrbr_State_Abrvtn, "AA") & !str_detect(Prscrbr_State_Abrvtn, "AE") & !str_detect(Prscrbr_State_Abrvtn, "AP") & !str_detect(Prscrbr_State_Abrvtn, "ZZ") & !str_detect(Prscrbr_State_Abrvtn, "XX")) |>
+  # filter out missing state fips:
+  filter(!is.na(Prscrbr_State_FIPS)) |>
+  # create a new variable to facilitate matching on the City by converting to lower case
+  mutate(city_fixed = str_to_lower(Prscrbr_City)) |>
+
+  ## join to prv dataset for RUCA, address, ZIP:
+  left_join(
+    prv[c(1,8,9,13,14,86)],                       # y dataset
+    by = join_by(
+      Prscrbr_NPI == PRSCRBR_NPI,
+      year == year),
+    relationship = "many-to-one"                  # left_join will not work without specifying this relation
+  ) |>
+  # compile address variable
+  mutate(address = paste0(Prscrbr_St1, ", ", Prscrbr_City, ", ", Prscrbr_State_Abrvtn, " ", Prscrbr_zip5)) |>
+
+  ## Correct typos:
+  mutate(Prscrbr_State_Abrvtn = if_else(
+    address == "1149 Bloomfield Ave, Clifton, NY 07012",
+    "NJ",
+    Prscrbr_State_Abrvtn)) |>
+  mutate(Prscrbr_State_Abrvtn = if_else(
+    address == "209 Highway 18 South, East Brunswick, PA 08816",
+    "NJ",
+    Prscrbr_State_Abrvtn)) |>
+  mutate(Prscrbr_State_Abrvtn = if_else(
+    address == "1590-01 Constitution Boulvard, Rock Hill, CA 29732",
+    "SC",
+    Prscrbr_State_Abrvtn)) |>
+  mutate(Prscrbr_State_Abrvtn = if_else(
+    address == "209 Nw 8th St, Seminole, NM 79360",
+    "TX",
+    Prscrbr_State_Abrvtn)) |>
+  mutate(Prscrbr_State_Abrvtn = if_else(
+    address == "1149 Bloomfield Ave, Clifton, NY 07012",
+    "NJ",
+    Prscrbr_State_Abrvtn)) |>
+  mutate(Prscrbr_State_Abrvtn = if_else(
+    address == "365 Montauk Ave, New London, TN 06320",
+    "CT",
+    Prscrbr_State_Abrvtn)) |>
+  mutate(Prscrbr_State_Abrvtn = if_else(
+    address == "8687 Connecticut St, Merillville, IL 46410",
+    "IN",
+    Prscrbr_State_Abrvtn)) |>
+  # exclude the military zip
+  filter(Prscrbr_zip5 != 96555) |>
+  # correct Lake Mary, FL city and Zip
+  mutate(Prscrbr_City = ifelse(Prscrbr_zip5 == 32476, "Lake Mary", Prscrbr_City)) |>
+  mutate(Prscrbr_zip5 = ifelse(Prscrbr_zip5 == 32476, 32746, Prscrbr_zip5)) |>
+  # re-compile address variable
+  mutate(address = paste0(Prscrbr_St1, ", ", Prscrbr_City, ", ", Prscrbr_State_Abrvtn, " ", Prscrbr_zip5))
+
+# Summary of missing values from provider dataset
+sum(is.na(data_fips$Prscrbr_RUCA))
+sum(is.na(data_fips$Prscrbr_zip5))
+sum(is.na(data_fips$Prscrbr_St1))
+```
+
+## USGS Diagnostics
+
+It is possible that a single name/state pair could match to multiple different FIPS codes in the unmodified dataset; let's see if that is the case:
+
+```{r}
+# number of unique state/map_name combinations
+usgs |>
+  # add variables for fips and convert text-formatted date_created variable to a proper date
+  mutate(fips = paste0(state_numeric, county_numeric)) |>
+  # select counties present in 2013 only
+  filter(fips %in% counties_2013$fips) |>   
+  select(state_numeric, map_name) |>
+  unique() |> nrow()
+# number of unique fips/map_name combinations
+usgs |>
+  # add variables for fips and convert text-formatted date_created variable to a proper date
+  mutate(fips = paste0(state_numeric, county_numeric)) |>
+  # select counties present in 2013 only
+  filter(fips %in% counties_2013$fips) |>   
+  select(state_numeric, map_name, county_numeric) |>
+  unique() |> nrow()
+
+# number of unique state/feature_name combinations
+usgs |>
+  # add variables for fips and convert text-formatted date_created variable to a proper date
+  mutate(fips = paste0(state_numeric, county_numeric)) |>
+  # select counties present in 2013 only
+  filter(fips %in% counties_2013$fips) |>   
+  select(state_numeric, feature_name) |>
+  unique() |> nrow()
+# number of unique fips/feature_name combinations
+usgs |>
+  # add variables for fips and convert text-formatted date_created variable to a proper date
+  mutate(fips = paste0(state_numeric, county_numeric)) |>
+  # select counties present in 2013 only
+  filter(fips %in% counties_2013$fips) |>   
+  select(state_numeric, feature_name, county_numeric) |>
+  unique() |> nrow()
+```
+
+It appears that there are non-unique combinations of state FIPS and map_name, as well as non-unique combinations of state FIPS and feature_name.  We don't want to randomly assign FIPS values to these entries, so we will need to create reduced datasets to match on containing only the unique pairs.
+
+## Examining excluded locales
+
+Before proceeding, entries from Puerto Rico, Virgin Islands, and Guam and/or any entries with a military mail code, or a missing address will be examined, as they will be filtered out in the next step:
+
+```{r}
+#| label: OUD_summary
+filtered_geo <- data_tx |>
+  filter(
+    # select Puerto Rico, Virgin Islands, and Guam; these are not in NCHSUR  (codes 66, 72, 78), or NA:
+    Prscrbr_State_FIPS == "66" | Prscrbr_State_FIPS == "72" | Prscrbr_State_FIPS == "78" | is.na(Prscrbr_State_FIPS) |
+    # select military mail codes (codes AA, AE, AP); other codes (ZZ, XX):
+    Prscrbr_State_Abrvtn == "AA" | Prscrbr_State_Abrvtn == "AE" | Prscrbr_State_Abrvtn == "AP" | Prscrbr_State_Abrvtn == "ZZ" | Prscrbr_State_Abrvtn == "XX")
+
+# create a summary table by Prscrbr_State_Abrvtn of buprenorphine prescribers:
+filtered_geo |>
+  filter(MAT_generic == "bup" | MAT_brand == "bup") |>
+  group_by(Prscrbr_State_Abrvtn, tx) |>
+  summarise(N_prescribers = n(), patient_years_supplied = sum(Tot_Day_Suply/365)) |>
+  arrange(desc(patient_years_supplied)) |>
+  adorn_totals()
+
+# create a summary table by Prscrbr_State_Abrvtn of buprenorphine prescribers:
+filtered_geo |>
+  filter(MAT_generic == "met" | MAT_brand == "met") |>
+  group_by(Prscrbr_State_Abrvtn, tx) |>
+  summarise(N_prescribers = n(), patient_years_supplied = sum(Tot_Day_Suply/365)) |>
+  arrange(desc(patient_years_supplied)) |>
+  adorn_totals()
+
+# create a summary table by Prscrbr_State_Abrvtn of buprenorphine prescribers:
+filtered_geo |>
+  filter(MAT_generic == "nal" | MAT_brand == "nal") |>
+  group_by(Prscrbr_State_Abrvtn, tx) |>
+  summarise(N_prescribers = n(), patient_years_supplied = sum(Tot_Day_Suply/365)) |>
+  arrange(desc(patient_years_supplied)) |>
+  adorn_totals()
+
+# Some cleanup:
+rm(filtered_geo, counties_2013, data_tx, prv, usgs)
+```
+
+# Geolocation
+
+## 0 & 1: Searching USGS dataset & geocoding from zip
+
+We can now search the USGS dataset for the FIPS code corresponding to the city/state pair in the CDC dataset:
+
+```{r}
+#| label: search_USGS_zip
+# search USGS:
+data_fips <- left_join(data_fips,                      # x dataset
+  usgs_wide,                                           # y dataset
+  by = join_by(
+    Prscrbr_State_FIPS == state_numeric,
+    city_fixed == name),
+  relationship = "many-to-one") |>
+  # geocode from zipcode centroid & reverse to fips:
+  left_join(
+    data_fips$Prscrbr_zip5 |>                          # y dataset
+      unique() |>                                      # y dataset
+      geocode_zip() |>                                 # y dataset
+      mutate(fips1 = coords_to_fips(x = lng, y = lat)),# y dataset
+    by = join_by(Prscrbr_zip5 == zipcode),
+    relationship = "many-to-one") |>          
+  ## add variables for diagnosis
+  mutate(
+    # get the state abbreviation
+    State_Abbrevtn = fips_abbr(fips1),
+    # check if the state is correct
+    miss_state1 = if_else(Prscrbr_State_Abrvtn == State_Abbrevtn,
+                         0, 1, missing = 2),
+    # document the query
+    query0 = if_else(!is.na(fips0),
+                    "USGS",
+                    if_else(!is.na(fips1) & miss_state1 == 0,
+                            "zip",
+                            "geo")),
+    fips = if_else(!is.na(fips0),
+                    fips0,
+                    if_else(!is.na(fips1) & miss_state1 == 0,
+                            fips1,
+                            NA))) |>
+  select(-lat, -lng, -State_Abbrevtn)
+
+# diagnostics:
+data_fips |>
+  group_by(query0) |>
+  summarise(
+    Missing_fips = sum(is.na(fips)),
+    Miss_USGS = sum(is.na(fips0)),
+    Miss_ZIP = sum(miss_state1 != 0),
+    N_city_state_combo = n_distinct(Prscrbr_City, Prscrbr_State_FIPS),
+    N_addresses = n_distinct(address),
+    N = n()
+  ) |>
+  arrange(N) |>
+  adorn_totals()
+```
+
+It appears that ~70% of city/state combos were resolved with the USGS dataset.  Furthermore the bulk of the unresolved entries seem to have city/state pairs in highly populated areas, where place names likely do not uniquely resolve to counties.  Thus we can find more information on these providers in the [Medicare Part D Prescribers - by Provider](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider) dataset, and then lookup their fips via geolocation.
+
+### Addresses for geocoding
+
+We will now create a dataset containing the address to geocode; these will include all addresses not resolved with the USGS dataset, and a random sampling of those successfully resolved:
+
+```{r}
+#| label: addresses
+# set seed for slice_sample function
+seed <- as.integer(Sys.time())
+set.seed(seed)
+seed
+
+# create list of addresses
+addresses <- data_fips |>
+  # selecting unmatched entries
+  filter(query0 == "geo") |>
+  select(address, Prscrbr_St1, Prscrbr_City, Prscrbr_State_Abrvtn, Prscrbr_zip5, miss_state1, query0, fips) |>
+  unique() |>
+  mutate(group = "geocode") |>
+  ## binding to randomly chosen entries
+  # entries which matched to USGS and ZIP
+  rbind(
+    data_fips |>
+      filter(query0 == "USGS" & miss_state1 == 0) |>
+      select(address, Prscrbr_St1, Prscrbr_City, Prscrbr_State_Abrvtn, Prscrbr_zip5, miss_state1, query0, fips) |>
+      unique() |>
+      slice_sample(n = 100) |>
+      mutate(group = "USGS & Zip")
+    ) |>
+  # entries which matched to USGS but not ZIP
+  rbind(
+    data_fips |>
+      filter(query0 == "USGS" & miss_state1 != 0) |>
+      select(address, Prscrbr_St1, Prscrbr_City, Prscrbr_State_Abrvtn, Prscrbr_zip5, miss_state1, query0, fips) |>
+      unique() |>
+      slice_sample(n = 100) |>
+      mutate(group = "USGS")
+    ) |>
+  # entries which matched to ZIP but not USGS
+  rbind(
+    data_fips |>
+      filter(query0 == "zip") |>
+      select(address, Prscrbr_St1, Prscrbr_City, Prscrbr_State_Abrvtn, Prscrbr_zip5, miss_state1, query0, fips) |>
+      unique() |>
+      slice_sample(n = 100) |>
+      mutate(group = "Zip")
+  )
+```
+
+## 2: Geocoding: census > osm > arcgis > geoapify > opencage > mapbox
+
+```{r}
+#| label: load_addresses_2
+#| include: FALSE
+#| eval: FALSE
+load(file = "dataset/addresses_2.RData",)
+```
+
+Define queries:
+
+```{r}
+#| label: geocoding_queries
+queries <- data.frame(
+  service = c(
+    "census"
+    , "arcgis"      # limit 1?
+    , "osm"         # limit 1/s
+    , "iq"          # limit 1/s;    5000/d
+    , "tomtom"      # limit 5/s;    2500/d
+    # , "mapbox"      # limit 10/s;   100000 free requests
+    , "geoapify"    # limit 5/s;    3000/d
+    # , "opencage"  # limit reached, limit 1/s; 2500/d
+    , "geocodio"    # limit 16.7/s; 2500/d
+    # , "here"        # limit 5/s;    1000/d
+    )
+  )
+queries <- queries |>
+  mutate(
+    i = 1:nrow(queries),
+    queries = list(
+      list(method = 'census',
+           street = 'Prscrbr_St1',
+           city = 'Prscrbr_City',
+           state = 'Prscrbr_State_Abrvtn',
+           postalcode = 'Prscrbr_zip5')
+      , list(method = 'arcgis'
+           , address = 'address')
+      , list(method = 'osm',
+           street = 'Prscrbr_St1',
+           city = 'Prscrbr_City',
+           state = 'Prscrbr_State_Abrvtn',
+           postalcode = 'Prscrbr_zip5')
+      , list(method = 'iq'
+           , street = 'Prscrbr_St1'
+           , city = 'Prscrbr_City'
+           , state = 'Prscrbr_State_Abrvtn'
+           , postalcode = 'Prscrbr_zip5'
+           , custom_query = list(limit = 1)
+           )
+      , list(method = 'tomtom'
+           , address = 'address'
+           , custom_query = list(limit = 5)
+           )
+      # , list(method = 'mapbox'
+      #      , address = 'address'
+      #      , custom_query = list(limit = 10)
+      #      )
+      , list(method = 'geoapify'
+           , street = 'Prscrbr_St1'
+           , city = 'Prscrbr_City'
+           , state = 'Prscrbr_State_Abrvtn'
+           , postalcode = 'Prscrbr_zip5'
+           , custom_query = list(limit = 5)
+           )
+      # , list(method = 'opencage'
+      #      , address = 'address'
+      #      , custom_query = list(limit = 1)
+      #      )
+      , list(method = 'geocodio'
+           , street = 'Prscrbr_St1'
+           , city = 'Prscrbr_City'
+           , state = 'Prscrbr_State_Abrvtn'
+           , postalcode = 'Prscrbr_zip5'
+           , custom_query = list(limit = 5)
+           )
+      # , list(method = 'here'
+      #      , address = 'address'
+      #      , custom_query = list(limit = 5)
+      #      )
+      )
+    )
+queries
+```
+
+```{r}
+#| label: test_queries
+#| include: FALSE
+#| eval: FALSE
+# test queries
+for (query in queries$service) {
+  print(paste0("query ", queries[query == queries$service,]$i, ": ", query))
+  queries[queries[query == queries$service,]$i:nrow(queries),]$queries |>
+    rmNullObs() |>
+    print()
+  }
+# # test queries as they will be in re-geocoding blocks
+# for (query in unique(addresses[addresses$miss_state2 != 0,]$query2)) {
+#   print(paste0("query ", queries[query == queries$service,]$i, ": ", query))
+#   queries[queries[query == queries$service,]$i+1:nrow(queries),]$queries |>
+#     rmNullObs() |>
+#     print()
+#   }
+```
+
+```{r}
+#| label: test_services
+#| include: FALSE
+#| eval: FALSE
+i = 1
+for (query in queries$service) {
+  print(paste0("query ", queries[query == queries$service,]$i, ": ", query))
+  geocode_combine(
+    addresses[i,],
+    queries = queries[queries[query == queries$service,]$i:nrow(queries),]$queries |>
+          rmNullObs(),
+    cascade = TRUE) |>
+    print()
+  i = i+1
+  }
+```
+
+The following code geocodes entries individually so as not to exceed limits for each service.  NB geocoding API keys be generated and stored as an environmental variable (i.e. edit .Renviron, and load) for services other than US Census, OSM & ArcGIS.
+
+```{r}
+#| label: geocoding_1_by_1
+
+addresses_geo <- data.frame()
+top_i <- nrow(addresses)
+top_j <- nrow(queries)
+# top_i <- 100
+# top_j <- 3
+  
+for (i in 1:top_i) {
+  addresses2 <- addresses[i,] |>
+    mutate(fips_geo = NA)
+
+  for (j in 1:top_j) {
+    service <- queries[j,]$service
+    addresses2 <- geocode(
+      addresses2,
+      address = address,
+      method = service,
+      quiet = TRUE
+    ) |>
+    mutate(
+      fips2 = coords_to_fips(x = long, y = lat),
+      miss_state2 = if_else(
+        Prscrbr_State_Abrvtn == fips_abbr(fips2),
+        0, 1, missing = 2),
+      fips_geo = if_else(
+        miss_state2 == 0,
+        fips2, fips_geo
+      )
+    )
+  names(addresses2)[names(addresses2) == "lat"] <- paste0("lat_", service)
+  names(addresses2)[names(addresses2) == "long"] <- paste0("long_", service)
+  names(addresses2)[names(addresses2) == "fips2"] <- paste0("fips_", service)
+  names(addresses2)[names(addresses2) == "miss_state2"] <- paste0("miss_state_", service)
+  }
+  addresses_geo <- rbind(
+    addresses_geo,
+    addresses2)
+}
+```
+
+Diagnostics:
+
+```{r}
+#| label: geocoding_diagnostics
+
+addresses_geo |>
+  group_by(group) |>
+  summarise(
+    Missing_fips = sum(is.na(fips_geo)),
+    N = n()
+  ) |>
+  arrange(desc(N)) |>
+  adorn_totals()
+```
+
+We can see that about half of the addresses have been successfully resolved.
+
+### Remaining Addresses
+
+Examine the addresses which were not matched by USGS, zipcode, or geocoding:
+
+```{r}
+#| label: report_addresses
+addresses_geo |>
+  filter(query0 == "geo" & is.na(fips_geo)) |>
+  select(address)
+```
+
+# Compiling final datasets:
+
+```{r}
+#| label: join_data_fips
+data_fips <- left_join(data_fips,               # L dataset
+  addresses_geo |> select(address, fips_geo),   # R dataset
+  by = join_by(address == address),
+  relationship = "many-to-one") |>
+  # fold geocoded fips codes into main fips var
+  mutate(fips = if_else(
+    query0 == "geo",
+    fips_geo, 
+    fips))
+```
+
+Save datasets:
+
+```{r save}
+save(data_fips,
+     file = "dataset/data_fips.RData",
+     compress = TRUE,
+     compression_level = 9)
+save(addresses_geo,
+     file = "dataset/addresses_geo.RData",
+     compress = TRUE,
+     compression_level = 9)
+```
+
+# Other Thoughts
+
+Indication for OUD use (vs pain or EtOH use disorder) is a potential source of error when classifying prescriptions in the `tx` variable.  Consider future methods to potentially validate OUD vs pain treatment designations (as time allows):
+
+ - Classify prescriptions as OUD vs pain vs EtOH use disorder based on KNN of names of other drugs prescribed by the provider
+ - Query [FDA NDC DB](https://open.fda.gov/apis/drug/ndc/how-to-use-the-endpoint/) for NPIs associated with the values of `Brnd_Name` and `Gnrc_Name` which were matched above, then search those NDCs for the indication for use on DailyMed
+ - Check DEA X waver for prescriber's NPI
+ - Check prescriber's buprenorphine panel limit vs count of buprenorphine prescribed
+ - Check prescriber's place of work in NPI DB
+ - interrogate/validate CMS's method for translating a drug's NDC into a drug's brand and generic names
+ - recalculate the rural-urban classification for each year using the [census estimates](https://www.census.gov/programs-surveys/popest/data/data-sets.html)
+
+Translation from NDC to a drug's brand/generic names likely simplifies many analyses, but could be a significant source of bias for our analysis.
+
+## Alternate Approaches to Geocoding, Reverse Geocoding & NCHSURC classification
+
+Alternate geocoding:
+
+ - The `geocode()` function from the `ggmap` package to find the coordinates for each city/state combination.  The function will return a dataframe with the coordinates for each city/state combination, and will also return a status code indicating whether the coordinates were found successfully.  We will use the status code to filter out any entries for which the coordinates were not found.  This method requires access to the google API.
+
+Alternate reverse-geocoding:
+
+   - The `fips()` function from the `USAboundaries` package to convert the coordinates to FIPS code.  This function uses the `sf` package to find the FIPS code for the county in which the coordinates are located.  This method is the most straightforward, but it is also the slowest.
+   - The `fips()` function from the `tigris` package to convert the coordinates to FIPS code.  This function uses the `sf` package to find the FIPS code for the county in which the coordinates are located.  This method is faster than the `USAboundaries` method, but it is still relatively slow.
+   - The `fips()` function from the `MazamaSpatialUtils` package to convert the coordinates to FIPS code.  This function uses a lookup table to find the FIPS code for the county in which the coordinates are located.  This method is the fastest, but it is also the least accurate.  The lookup table is based on the 2010 census, so it will not include any counties that were created after 2010.  This method will also not work for any coordinates that are outside of the US.
+
+Rural-urban classification:
+
+ - Lookup rural-urban clssification: For this step we can used CDC's [2013 Urban-Rural Classification Scheme for Counties](https://www.cdc.gov/nchs/data_access/urban_rural.htm); specifically the [NCHSurbruralcodes Spreadsheet](https://www.cdc.gov/nchs/data/data_acces_files/NCHSURCodes2013.xlsx) which contains the FIPS codes and rural-urban classifications for each county in the US.  The data can be plotted according to FIPS code using `ggplot2` or `MazamaSpatialPlots` packages.
+ - Alternatively the classification could be manually recalculated from census data for each year.
+
+# Session Info
+
+```{r}
+#| label: session_info
+sessionInfo()
+```
+
+```{r}
+#| label: geocode_here
+#| include: FALSE
+#| eval: FALSE
+  
+for (i in 1:nrow(addresses_geo)) {
+  addresses2 <- addresses_geo[i,]
+  
+  service <- "here"
+  addresses2 <- geocode(
+    addresses2,
+    address = address,
+    method = service,
+    quiet = TRUE
+  ) |>
+  mutate(
+    fips2 = coords_to_fips(x = long, y = lat),
+    miss_state2 = if_else(
+      Prscrbr_State_Abrvtn == fips_abbr(fips2),
+      0, 1, missing = 2),
+    fips_geo = if_else(
+      miss_state2 == 0,
+      fips2, fips_geo
+    )
+  )
+  names(addresses2)[names(addresses2) == "lat"] <- paste0("lat_", service)
+  names(addresses2)[names(addresses2) == "long"] <- paste0("long_", service)
+  names(addresses2)[names(addresses2) == "fips2"] <- paste0("fips_", service)
+  names(addresses2)[names(addresses2) == "miss_state2"] <- paste0("miss_state_", service)
+
+  addresses_geo <- rbind(
+    addresses_geo,
+    addresses2)
+}
+```
+
+```{r}
+#| label: re_geocoding
+#| include: FALSE
+#| eval: FALSE
+
+for (i in 2:(nrow(queries))) {        # repeat re-geocoding & diagnostics
+  for (query in unique(addresses[addresses$miss_state2 != 0,]$query2)) {
+    if (is.NullOb(queries[queries[query == queries$service,]$i+1:nrow(queries),]$queries)){
+      break
+    }
+    addresses <- left_join(addresses,   # x dataset
+      geocode_combine(                  # y dataset
+        addresses |> filter(miss_state2 != 0 & query2 == query),
+        queries =
+          queries[queries[query == queries$service,]$i+1:nrow(queries),]$queries |>
+            rmNullObs(),
+        cascade = TRUE) |>
+        select(address, lat, long, query),
+      by = join_by(address == address),
+      relationship = "many-to-one")  |>
+    mutate(fips2 =
+      if_else(!is.na(query),            # update fips2 if new query is present
+      coords_to_fips(x = long, y = lat),# if present calculate new fips2 value
+      fips2)) |>                        # else keep old value
+    mutate(miss_state2 =                # update miss_state2
+      if_else(!is.na(query) & (Prscrbr_State_Abrvtn == fips_abbr(fips2)),
+      0, 1, missing = miss_state2)) |>
+    mutate(query2 =                     # update query2 if there's a new one
+      if_else(!is.na(query),            # check if there's a new query value
+      query, query2)) |>                # update value; else keep old value
+    select(-lat, -long, -query)
+    }
+
+  # Diagnostics:
+  addresses |>
+    group_by(query2) |>
+    summarise(
+      Missing_fips = sum(is.na(fips2)),
+      Correct_State = sum(miss_state2 == 0),
+      N = n()
+    ) |>
+    arrange(desc(N)) |>
+    adorn_totals()
+}
+```
+
+```{r}
+#| label: unused1
+#| include: FALSE
+#| eval: FALSE
+
+for (query in unique(addresses[addresses$miss_state2 != 0,]$query2)) {
+  print(query)
+  print(queries[query == queries$service,]$i+1)
+  queries[queries[query == queries$service,]$i+1:nrow(queries),]$queries |>
+    rmNullObs() |>
+    print()
+  }
+```
+
+```{r}
+#| label: unused2
+#| include: FALSE
+#| eval: FALSE
+for (query in unique(addresses[addresses$miss_state2 != 0,]$query2)) {
+ print(query)
+ print(queries[query == queries$service,]$i+1)
+ # addresses |> filter(miss_state2 != 0 & query2 == query)
+ print(queries[queries[query == queries$service,]$i+1:nrow(queries),]$queries)
+ }
+```
+
+```{r}
+#| label: old_regeocode
+#| include: FALSE
+#| eval: FALSE
+for (query in unique(addresses[addresses$miss_state2 != 0,]$query2)) {
+  addresses <- left_join(
+    addresses,                                                                        
+    geocode_combine(                                                                  
+      addresses |>                                                                    
+        filter(miss_state2 != 0 & query2 == query),                                   
+      queries = queries[queries[query == queries$service,]$i:nrow(queries),]$queries, 
+      cascade = TRUE) |>                                                              
+      select(address, lat, long, query),                                              
+    by = join_by(address == address),
+    relationship = "many-to-one")  |>
+  ## Diagnostics: fips, state, and check if the state is correct
+  mutate(fips2 = coords_to_fips(x = long, y = lat)) |>
+  mutate(miss_state2 = if_else(
+    Prscrbr_State_Abrvtn == fips_abbr(fips2),
+    0, 1, missing = miss_state2)) |>
+  ## rename/remove variables for next round of geocoding
+  mutate(query2 = if_else(
+    miss_state2 == 0, 
+    query, query2, missing = query2)) |>
+  select(-lat, -long, -query)}
+# cleanup
+rm(query)
+
+# Diagnostics:
+addresses |>
+  group_by(query2) |>
+  summarise(
+    Missing_fips = sum(is.na(fips2)),
+    Correct_State = sum(miss_state2 == 0),
+    N = n()
+  ) |>
+  arrange(desc(N)) |>
+  adorn_totals()
+```
+
+```{r}
+#| label: manual_search
+#| include: FALSE
+#| eval: FALSE
+# geo6 <- geo5 |>                                              # x dataset
+#   left_join(
+#     data.frame(
+#       address = c(
+#         "918 W Platt St # 1, Maquoketa, IA 52060",
+#         "3001 Douglas Blvd # 325, Roseville, CA 95661",
+#         "8687 Connecticut St, Merillville, IL 46410",
+#         "3901 Rainbow Blvd # Ms 4010, Kansas City, KS 66103",
+#         "209 Nw 8th St, Seminole, NM 79360",
+#         "729 Sunrise Ave #602, Roseville, CA 95661",
+#         "812 Pollard Rd # 5, Los Gatos, CA 95032",
+#         "365 Montauk Ave, New London, TN 06320"
+#       ),
+#       fips6 = c(
+#         "19097",
+#         "06061",
+#         "18089",
+#         "20209",
+#         "48165",
+#         "06085",
+#         "06085",
+#         "09011"
+#       )),
+#     by = join_by(address == address),
+#     relationship = "many-to-one")                            # left_join will not work without specifying this relation
+```
+
+```{r}
+#| label: re_geocoding_4
+#| include: FALSE
+#| eval: FALSE
+# for (query in unique(addresses[addresses$miss_state2 != 0,]$query2)) {
+#   addresses <- left_join(addresses,      # x dataset
+#     geocode_combine(                     # y dataset
+#       addresses |> filter(miss_state2 != 0 & query2 == query),                                   
+#       queries = 
+#         queries[queries[query == queries$service,]$i+1:nrow(queries),]$queries, 
+#       cascade = TRUE) |>                                                              
+#       select(address, lat, long, query),                                              
+#     by = join_by(address == address),
+#     relationship = "many-to-one")  |>
+#   mutate(fips2 = 
+#     if_else(!is.na(query),               # update fips2 if new query is present
+#     coords_to_fips(x = long, y = lat),   # if present calculate new fips2 value
+#     fips2)) |>                           # else keep old value
+#   mutate(miss_state2 =                   # update miss_state2
+#     if_else(!is.na(query) & (Prscrbr_State_Abrvtn == fips_abbr(fips2)),
+#     0, 1, missing = miss_state2)) |>
+#   mutate(query2 =                        # update query2 if there's a new one
+#     if_else(!is.na(query),               # check if there's a new query value
+#     query, query2)) |>                   # update value; else keep old value
+#   select(-lat, -long, -query)}
+# # cleanup
+# rm(query)
+# 
+# # Diagnostics:
+# addresses |>
+#   group_by(query2) |>
+#   summarise(
+#     Missing_fips = sum(is.na(fips2)),
+#     Correct_State = sum(miss_state2 == 0),
+#     N = n()
+#   ) |>
+#   arrange(desc(N)) |>
+#   adorn_totals()
+```
+
+
+
+```{r}
+#| label: geocoding_veryold
+#| include: FALSE
+#| eval: FALSE
+addresses <- addresses |>
+  geocode_combine(
+    queries = queries$queries,
+    cascade = TRUE) |>
+  ## Diagnostics: fips, state, and check if the state is correct
+  mutate(fips2 = coords_to_fips(x = long, y = lat)) |>
+  mutate(miss_state2 = if_else(Prscrbr_State_Abrvtn == fips_abbr(fips2),
+                               0, 1, missing = 2)) |>
+  ## rename/remove variables for next round of geocoding
+  rename(query2 = query) |>
+  select(-lat, -long)
+
+# Diagnostics:
+addresses |>
+  group_by(query2) |>
+  summarise(
+    Missing_fips = sum(is.na(fips2)),
+    Correct_State = sum(miss_state2 == 0),
+    N = n()
+  ) |>
+  arrange(desc(N)) |>
+  adorn_totals()
+```
