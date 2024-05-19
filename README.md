@@ -9,12 +9,13 @@ Materials and code for my MPH practice experience project on the effect of the C
  - Dataset
     - [Data Download](https://matthew-hoctor.github.io/BupRx/dl.html)
     - [Provider and OUD treatment variables](https://matthew-hoctor.github.io/BupRx/dataset_tx.html)
-    - [Geographic variables (rural/urban, etc)](https://matthew-hoctor.github.io/BupRx/dataset_geo.html)
+    - [Geocoding to fips code](https://matthew-hoctor.github.io/BupRx/dataset_geo3.html)
+    - [Rural-Urban Variables](https://matthew-hoctor.github.io/BupRx/dataset_nchsurc.html)
     - [XGBoost prediction of ambiguous entries](https://matthew-hoctor.github.io/BupRx/classification.html)
  - Analysis
     - [Exploratory Analysis](https://matthew-hoctor.github.io/BupRx/exploratory.html)
- - [Presentation code](https://github.com/matthew-hoctor/BupRx/blob/main/manuscript.qmd), [html]()
- - [Manuscript code](https://github.com/matthew-hoctor/BupRx/blob/main/manuscript.qmd), [PDF](https://github.com/matthew-hoctor/BupRx/blob/main/manuscript.pdf)
+ - [Presentation](https://matthew-hoctor.github.io/BupRx/presentation.html)), [code](https://github.com/matthew-hoctor/BupRx/blob/main/presentation.qmd)
+ - [Manuscript PDF](https://github.com/matthew-hoctor/BupRx/blob/main/manuscript.pdf), [code](https://github.com/matthew-hoctor/BupRx/blob/main/manuscript.qmd)
 
 
 Tentative: Exploring Effects of the Comprehensive Addiction Recovery Act on Buprenorphine Prescribing Practices using Medicare Part D Data
