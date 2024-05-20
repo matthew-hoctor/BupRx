@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta name="author" content="Matthew Hoctor, PharmD">
+<meta name="dcterms.date" content="2024-05-19">
+<title>Dataset - Rural-Urban Classification</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+<script src="dataset_nchsurc_files/libs/clipboard/clipboard.min.js"></script>
+<script src="dataset_nchsurc_files/libs/quarto-html/quarto.js"></script>
+<script src="dataset_nchsurc_files/libs/quarto-html/popper.min.js"></script>
+<script src="dataset_nchsurc_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="dataset_nchsurc_files/libs/quarto-html/anchor.min.js"></script>
+<link href="dataset_nchsurc_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="dataset_nchsurc_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="dataset_nchsurc_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="dataset_nchsurc_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="dataset_nchsurc_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+</head>
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Contents</h2>
+   
+  <ul>
+<li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#load-data" id="toc-load-data" class="nav-link" data-scroll-target="#load-data">Load data</a></li>
+  <li><a href="#manual-fips-codes" id="toc-manual-fips-codes" class="nav-link" data-scroll-target="#manual-fips-codes">Manual fips codes</a></li>
+  <li>
+<a href="#matching-to-nchsurc-dataset" id="toc-matching-to-nchsurc-dataset" class="nav-link" data-scroll-target="#matching-to-nchsurc-dataset">Matching to NCHSURC Dataset</a>
+  <ul>
+<li><a href="#match" id="toc-match" class="nav-link" data-scroll-target="#match">Match</a></li>
+  <li><a href="#ak-fips-codes" id="toc-ak-fips-codes" class="nav-link" data-scroll-target="#ak-fips-codes">AK fips codes</a></li>
+  <li><a href="#ct" id="toc-ct" class="nav-link" data-scroll-target="#ct">CT</a></li>
+  <li><a href="#set-urbanrural-classification" id="toc-set-urbanrural-classification" class="nav-link" data-scroll-target="#set-urbanrural-classification">Set Urban/Rural Classification</a></li>
+  </ul>
+</li>
+  <li><a href="#save-datasets" id="toc-save-datasets" class="nav-link" data-scroll-target="#save-datasets">Save datasets</a></li>
+  <li>
+<a href="#other-thoughts" id="toc-other-thoughts" class="nav-link" data-scroll-target="#other-thoughts">Other Thoughts</a>
+  <ul>
+<li><a href="#alternate-approaches-to-geocoding-reverse-geocoding-nchsurc-classification" id="toc-alternate-approaches-to-geocoding-reverse-geocoding-nchsurc-classification" class="nav-link" data-scroll-target="#alternate-approaches-to-geocoding-reverse-geocoding-nchsurc-classification">Alternate Approaches to Geocoding, Reverse Geocoding &amp; NCHSURC classification</a></li>
+  </ul>
+</li>
+  <li><a href="#session-info" id="toc-session-info" class="nav-link" data-scroll-target="#session-info">Session Info</a></li>
+  </ul></nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Dataset - Rural-Urban Classification</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Matthew Hoctor, PharmD </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">May 19, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header><div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">## load libraries:</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org">tidyverse</a></span><span class="op">)</span>      <span class="co"># dplyr, lubridate, stringr, etc, etc, etc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.4.4     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ purrr::%||%()   masks base::%||%()
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/sfirke/janitor">janitor</a></span><span class="op">)</span>        <span class="co"># adorn_totals()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'janitor'
+
+The following objects are masked from 'package:stats':
+
+    chisq.test, fisher.test</code></pre>
+</div>
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.fstpackage.org">fst</a></span><span class="op">)</span>            <span class="co"># read/write .fst files</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com">data.table</a></span><span class="op">)</span>     <span class="co"># ?is this package necessary?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'data.table'
+
+The following objects are masked from 'package:lubridate':
+
+    hour, isoweek, mday, minute, month, quarter, second, wday, week,
+    yday, year
+
+The following objects are masked from 'package:dplyr':
+
+    between, first, last
+
+The following object is masked from 'package:purrr':
+
+    transpose</code></pre>
+</div>
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readxl.tidyverse.org">readxl</a></span><span class="op">)</span>         <span class="co"># read excel files</span></span>
+<span><span class="co"># library(readODS)      # to read .ods file</span></span>
+<span><span class="co"># library(campfin)      # for working with abbreviations in US place names</span></span>
+<span><span class="co"># library(SUNGEO)       # for batch geocoding from OSM</span></span>
+<span><span class="co"># library(fipio)        # coords_to_fips()</span></span>
+<span><span class="co"># library(zipcodeR)     # for finding zipcode centroid coords</span></span>
+<span><span class="co"># library(tidygeocoder) # for batch geocoding from multiple sources in parallel</span></span>
+<span><span class="co"># library(tidycensus)   # ?county name to FIPS?</span></span>
+<span><span class="co"># library(tigris)       # counties(): download year-specific county data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="overview" class="level1"><h1>Overview</h1>
+<p>This project looks to understand the impact of the Comprehensive Addiction and Recovery Act (CARA) of 2016 on patterns of buprenorphine prescribing practices by examining openly available medicare part D data.</p>
+<p>The steps in this page require that the data be downloaded first (see the <a href="https://matthew-hoctor.github.io/BupRx/dl.html">data download</a> page), and for the <a href="https://matthew-hoctor.github.io/BupRx/dataset_tx.html">treatment variables</a> to be compiled. The scripts below show the data generation process.</p>
+<p>Using the USGS Populated Places dataset, we will attempt to convert the city/state data from the dataset into a a FIPS code, which will be used to lookup the CDC’s 2013 Urban-Rural Classification using the following steps:</p>
+<ul>
+<li>The USGS dataset (which can be found as a text file within their Geographic Names Information System (GNIS) <a href="https://www.usgs.gov/us-board-on-geographic-names/download-gnis-data">here</a>) contains several variables including the state name/FIPS, the ‘map name’ (which is often the city name), and the county name/FIPS. The first step will be to lookup the city/state in this dataset and retrieve the full FIPS.</li>
+<li>Lookup rural-urban clssification: For this step we can use the FIPS code to lookup the CDC’s <a href="https://www.cdc.gov/nchs/data_access/urban_rural.htm">2013 Urban-Rural Classification Scheme for Counties</a>; specifically using the <a href="https://www.cdc.gov/nchs/data/data_acces_files/NCHSURCodes2013.xlsx">NCHSurbruralcodes Spreadsheet</a> which contains the FIPS codes and rural-urban classifications for each county in the US.</li>
+</ul>
+<p>NB the CDC provides a helpful summary of <a href="https://www.cdc.gov/nchs/nvss/bridged_race/county_geography-_changes1990-present.pdf">County Geography Changes: 1990-present</a>.</p>
+</section><section id="load-data" class="level1"><h1>Load data</h1>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Load the dataset from the prior step:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"dataset/data_fips.RData"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"dataset/addresses_geo.RData"</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="co"># Load the NCHSURC dataset:</span></span>
+<span><span class="co">#| label: NCHSURC_dataset</span></span>
+<span><span class="va">nchsurc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readxl.tidyverse.org/reference/read_excel.html">read_excel</a></span><span class="op">(</span></span>
+<span>  <span class="st">"data/NCHSURCodes2013.xlsx"</span>,</span>
+<span>  col_names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># rename the FIPS code NCHSURC variables (to make the left_join simpler):</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>fips <span class="op">=</span> <span class="va">`FIPS code`</span>, nchsurc <span class="op">=</span> <span class="va">`2013 code`</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># convert the numerical value of the fips variable to a 5-numeral character</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>fips <span class="op">=</span> <span class="fu"><a href="https://stringr.tidyverse.org/reference/str_pad.html">str_pad</a></span><span class="op">(</span><span class="va">fips</span>, width <span class="op">=</span> <span class="fl">5</span>, pad <span class="op">=</span> <span class="st">"0"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">fips</span>, <span class="va">nchsurc</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="manual-fips-codes" class="level1"><h1>Manual fips codes</h1>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">addresses_geo</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">fips_geo</span><span class="op">)</span> <span class="op">&amp;</span> <span class="op">(</span><span class="va">group</span> <span class="op">==</span> <span class="st">"geocode"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">Prscrbr_State_Abrvtn</span>, <span class="va">Prscrbr_City</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">address</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 69 × 1
+   address                                       
+   &lt;chr&gt;                                         
+ 1 221 E Hampden Ave, Englewood, CO 80113        
+ 2 499 E Hampden Ave, Englewood, CO 80113        
+ 3 601 E Hampden Ave, Englewood, CO 80113        
+ 4 799 E Hampden Avenue, Englewood, CO 80113     
+ 5 799 E Hampden Ave, Englewood, CO 80113        
+ 6 2955 S Broadway, Englewood, CO 80113          
+ 7 701 E Hampden Ave, Englewood, CO 80113        
+ 8 3333 S Bannock St, Englewood, CO 80110        
+ 9 3277 S Lincoln St, Englewood, CO 80113        
+10 499 E Hampden Ave Ste 220, Englewood, CO 80113
+# ℹ 59 more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_fips</span> <span class="op">&lt;-</span> <span class="va">data_fips</span> <span class="op">|&gt;</span>                                   <span class="co"># x dataset</span></span>
+<span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span></span>
+<span>   <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>                                              <span class="co"># y dataset</span></span>
+<span>     address <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span> <span class="co"># 0</span></span>
+<span>       <span class="st">"221 E Hampden Ave, Englewood, CO 80113"</span>,            <span class="co"># 1</span></span>
+<span>       <span class="st">"499 E Hampden Ave, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"601 E Hampden Ave, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"799 E Hampden Avenue, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"799 E Hampden Ave, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"2955 S Broadway, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"701 E Hampden Ave, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"3333 S Bannock St, Englewood, CO 80110"</span>,</span>
+<span>       <span class="st">"3277 S Lincoln St, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"499 E Hampden Ave Ste 220, Englewood, CO 80113"</span>,    <span class="co"># 10</span></span>
+<span>       <span class="st">"499 East Hampden Avenue, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"799 E Hampden Ave Ste 315, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"3330 S Broadway, Englewood, CO 80151"</span>,</span>
+<span>       <span class="st">"499 E Hampden Ave Ste 100, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"750 W Hampden Ave Ste 105, Englewood, CO 80110"</span>,</span>
+<span>       <span class="st">"3701 S Broadway, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"3515 S Delaware St, Englewood, CO 80110"</span>,</span>
+<span>       <span class="st">"3460 S Federal Blvd, Englewood, CO 80110"</span>,</span>
+<span>       <span class="st">"799 E Hampden Ave Ste 300, Englewood, CO 80113"</span>,</span>
+<span>       <span class="st">"499 E Hampden Ave Ste 360, Englewood, CO 80113"</span>,    <span class="co"># 20</span></span>
+<span>       <span class="st">"730 W. Hampden Ave., Englewood, CO 80110"</span>,</span>
+<span>       <span class="st">"5257 S Wadsworth Blvd, Littleton, CO 80123"</span>,</span>
+<span>       <span class="st">"6169 S Balsam Way, Littleton, CO 80123"</span>,</span>
+<span>       <span class="st">"6179 S Balsam Way, Littleton, CO 80123"</span>,</span>
+<span>       <span class="st">"6901 S Pierce St, Littleton, CO 80128"</span>,</span>
+<span>       <span class="st">"7335 S Pierce St, Littleton, CO 80128"</span>,</span>
+<span>       <span class="st">"6169 South Balsam Way, Littleton, CO 80123"</span>,</span>
+<span>       <span class="st">"7325 S Pierce St Ste 102, Littleton, CO 80128"</span>,</span>
+<span>       <span class="st">"5066 S Wadsworth Blvd, Littleton, CO 80123"</span>,</span>
+<span>       <span class="st">"7345 S Pierce St Ste 110, Littleton, CO 80128"</span>,    <span class="co">#30</span></span>
+<span>       <span class="st">"107b Ala Malama St, Kaunakakai, HI 96748"</span>,</span>
+<span>       <span class="st">"30 Oki Place, Kaunakakai, HI 96748"</span>,</span>
+<span>       <span class="st">"28 Kamoi St, Kaunakakai, HI 96748"</span>,</span>
+<span>       <span class="st">"30 Oki Place #2040, Kaunakakai, HI 96748"</span>,</span>
+<span>       <span class="st">"112 Champagne Blvd, Breaux Bridge, LA 70517"</span>,</span>
+<span>       <span class="st">"1555 Gary Dr Ste C, Breaux Bridge, LA 70517"</span>,</span>
+<span>       <span class="st">"209 Champagne Blvd., Breaux Bridge, LA 70517"</span>,</span>
+<span>       <span class="st">"548 Lakes Blvd, Breaux Bridge, LA 70517"</span>,</span>
+<span>       <span class="st">"131 Emerald St, Wrentham, MA 02093"</span>,</span>
+<span>       <span class="st">"6020 Richmond Hwy Ste 100, Alexandria, VA 22303"</span>, <span class="co"># 40</span></span>
+<span>       <span class="st">"6201 Centreville Rd, Centreville, VA 20121"</span>,</span>
+<span>       <span class="st">"13880 Braddock Rd, Centreville, VA 20121"</span>,</span>
+<span>       <span class="st">"6138 Redwood Square Ctr Ste 204, Centreville, VA 20121"</span>,</span>
+<span>       <span class="st">"247 Ramble Rd, Collinsville, VA 24078"</span>,</span>
+<span>       <span class="st">"3155 Earlysville Rd, Earlysville, VA 22936"</span>,</span>
+<span>       <span class="st">"9901 Braddock Rd, Fairfax, VA 22032"</span>,</span>
+<span>       <span class="st">"4887 Wheatstone Dr, Fairfax, VA 22032"</span>,</span>
+<span>       <span class="st">"3058 River Rd W, Goochland, VA 23063"</span>, </span>
+<span>       <span class="st">"3737 W Main St Ste 101, Salem, VA 24153"</span>,</span>
+<span>       <span class="st">"160 Warrior Dr, Stephens City, VA 22655"</span>,        <span class="co"># 50</span></span>
+<span>       <span class="st">"640 Warrior Dr, Stephens City, VA 22655"</span>,</span>
+<span>       <span class="st">"13199 Centerpointe Way, Woodbridge, VA 22193"</span>,</span>
+<span>       <span class="st">"2296 Opitz Blvd, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"14904 Jefferson Davis Hwy, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"1954 Opitz Blvd # 7, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"14139 Potomac Mills Rd, Woodbridge, VA 22193"</span>,</span>
+<span>       <span class="st">"2022 Opitz Blvd Ste B, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"2200 Opitz Blvd Ste 235, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"2280 Opitz Blvd, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"2200 Opitz Blvd, Woodbridge, VA 22191"</span>,         <span class="co"># 60</span></span>
+<span>       <span class="st">"14605 Potomac Branch Dr, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"1954 Opitz Blvd Unit 7, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"14605 Potomac Branch Dr Ste 100, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"13168 Centerpointe Way, Woodbridge, VA 22193"</span>,</span>
+<span>       <span class="st">"1954 Opitz Blvd, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"2010 Opitz Blvd Ste A, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"1900 Opitz Blvd Ste F, Woodbridge, VA 22191"</span>,</span>
+<span>       <span class="st">"5808 Mapledale Plz, Woodbridge, VA 22193"</span>,</span>
+<span>       <span class="st">"2701 Neabsco Common Pl, Woodbridge, VA 22191"</span><span class="op">)</span>,</span>
+<span>     fips_manual <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>       <span class="st">"08031"</span>, <span class="co"># 1</span></span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>, <span class="co"># 10</span></span>
+<span>       <span class="st">"08005"</span>, </span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08031"</span>,</span>
+<span>       <span class="st">"08005"</span>,</span>
+<span>       <span class="st">"08005"</span>, <span class="co"># 20</span></span>
+<span>       <span class="st">"08005"</span>, </span>
+<span>       <span class="st">"08059"</span>,</span>
+<span>       <span class="st">"08059"</span>,</span>
+<span>       <span class="st">"08059"</span>,</span>
+<span>       <span class="st">"08059"</span>,</span>
+<span>       <span class="st">"08059"</span>,</span>
+<span>       <span class="st">"08059"</span>,</span>
+<span>       <span class="st">"08059"</span>,</span>
+<span>       <span class="st">"08059"</span>,</span>
+<span>       <span class="st">"08059"</span>, <span class="co"># 30</span></span>
+<span>       <span class="st">"15005"</span>, </span>
+<span>       <span class="st">"15009"</span>,</span>
+<span>       <span class="st">"15009"</span>,</span>
+<span>       <span class="st">"15009"</span>,</span>
+<span>       <span class="st">"22099"</span>,</span>
+<span>       <span class="st">"22099"</span>,</span>
+<span>       <span class="st">"22099"</span>,</span>
+<span>       <span class="st">"22099"</span>,</span>
+<span>       <span class="st">"25021"</span>,</span>
+<span>       <span class="st">"51059"</span>, <span class="co"># 40</span></span>
+<span>       <span class="st">"51059"</span>, </span>
+<span>       <span class="st">"51059"</span>,</span>
+<span>       <span class="st">"51059"</span>,</span>
+<span>       <span class="st">"51089"</span>,</span>
+<span>       <span class="st">"51003"</span>,</span>
+<span>       <span class="st">"51059"</span>,</span>
+<span>       <span class="st">"51059"</span>,</span>
+<span>       <span class="st">"51075"</span>,</span>
+<span>       <span class="st">"51161"</span>,</span>
+<span>       <span class="st">"51069"</span>, <span class="co"># 50</span></span>
+<span>       <span class="st">"51069"</span>, </span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>, <span class="co"># 60</span></span>
+<span>       <span class="st">"51153"</span>, </span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>,</span>
+<span>       <span class="st">"51153"</span>  <span class="co"># 69</span></span>
+<span>     <span class="op">)</span><span class="op">)</span>,</span>
+<span>   by <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/join_by.html">join_by</a></span><span class="op">(</span><span class="va">address</span> <span class="op">==</span> <span class="va">address</span><span class="op">)</span>,</span>
+<span>   relationship <span class="op">=</span> <span class="st">"many-to-one"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># fold geocoded fips codes into main fips var</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>fips <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html">if_else</a></span><span class="op">(</span></span>
+<span>    <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">fips_manual</span><span class="op">)</span>,</span>
+<span>    <span class="va">fips_manual</span>, </span>
+<span>    <span class="va">fips</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">data_fips</span><span class="op">$</span><span class="va">fips</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+</section><section id="matching-to-nchsurc-dataset" class="level1"><h1>Matching to NCHSURC Dataset</h1>
+<section id="match" class="level2"><h2 class="anchored" data-anchor-id="match">Match</h2>
+<p>We will proceed to match the FIPS codes in the dataset. Note that in principle we could recalculate the rural-urban classification for each year using the <a href="https://www.census.gov/programs-surveys/popest/data/data-sets.html">census estimates</a>, but instead will map the dataset onto the 2013 codes so that the variable remains constant over time. Starting by looking up NCHSUR code, and tabulate how many NA values are there for fips and state:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># match fips to NCHSURC</span></span>
+<span><span class="va">data_nchsurc</span> <span class="op">&lt;-</span> <span class="va">data_fips</span> <span class="op">|&gt;</span>       <span class="co"># the 'left' dataset</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span></span>
+<span>    <span class="va">nchsurc</span>,                       <span class="co"># the 'right' dataset</span></span>
+<span>    by <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/join_by.html">join_by</a></span><span class="op">(</span><span class="va">fips</span> <span class="op">==</span> <span class="va">fips</span><span class="op">)</span>,    <span class="co"># variables must exactly match</span></span>
+<span>    relationship <span class="op">=</span> <span class="st">"many-to-one"</span>,  <span class="co"># will not work w/o specifying relation</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># tabulate missing</span></span>
+<span><span class="va">data_nchsurc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">Prscrbr_State_Abrvtn</span>, <span class="va">fips</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span></span>
+<span>    Missing_NCHSURC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">nchsurc</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    N <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html">n</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">Missing_NCHSURC</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">Missing_NCHSURC</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://sfirke.github.io/janitor/reference/adorn_totals.html">adorn_totals</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'Prscrbr_State_Abrvtn'. You can override
+using the `.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Prscrbr_State_Abrvtn  fips Missing_NCHSURC  N
+                   AK 02063              29 29
+                Total     -              29 29</code></pre>
+</div>
+</div>
+</section><section id="ak-fips-codes" class="level2"><h2 class="anchored" data-anchor-id="ak-fips-codes">AK fips codes</h2>
+<p>How many NA values in AK by fips and place:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_nchsurc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">Prscrbr_State_Abrvtn</span> <span class="op">==</span> <span class="st">"AK"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">city_fixed</span>, <span class="va">fips</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span></span>
+<span>    Missing_NCHSURC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">nchsurc</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    N <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html">n</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">Missing_NCHSURC</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">Missing_NCHSURC</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://sfirke.github.io/janitor/reference/adorn_totals.html">adorn_totals</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'city_fixed'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code> city_fixed  fips Missing_NCHSURC  N
+     valdez 02063              27 27
+    cordova 02063               2  2
+      Total     -              29 29</code></pre>
+</div>
+</div>
+<p>Revisiting CDC’s summary of <a href="https://www.cdc.gov/nchs/nvss/bridged_race/county_geography-_changes1990-present.pdf">County Geography Changes: 1990-present</a>, we can see that the FIPS code 02063 was the “Valdez-Cordova Census Area” (FIPS code 02261) at the time of the NCHSURC dataset. We can manually update this entry:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_nchsurc</span> <span class="op">&lt;-</span> <span class="va">data_nchsurc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">nchsurc</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>fips <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html">if_else</a></span><span class="op">(</span><span class="va">fips</span> <span class="op">==</span> <span class="st">"02063"</span>, <span class="st">"02261"</span>, <span class="va">fips</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># mutate(nchsurc = if_else(fips == "02063", "02261", nchsurc)) |&gt;</span></span>
+<span>  <span class="co"># re-join the NCHSURC dataset to update the fips code</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span></span>
+<span>    <span class="va">nchsurc</span>,                              <span class="co"># the 'right' dataset</span></span>
+<span>    by <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/join_by.html">join_by</a></span><span class="op">(</span><span class="va">fips</span> <span class="op">==</span> <span class="va">fips</span><span class="op">)</span>,           <span class="co"># these variables must exactly match in both datasets</span></span>
+<span>    relationship <span class="op">=</span> <span class="st">"many-to-one"</span><span class="op">)</span>         <span class="co"># left_join will not work without specifying this relation</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">nchsurc</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+</section><section id="ct" class="level2"><h2 class="anchored" data-anchor-id="ct">CT</h2>
+<p>Apparently <a href="https://www.federalregister.gov/documents/2022/06/06/2022-12063/change-to-county-equivalents-in-the-state-of-connecticut">CT has switched from counties to planning ditricts</a>, and the new codes are in the USGS dataset, but not in the NCHSURC dataset (as this dataset preceeds the switch).</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_nchsurc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">Prscrbr_State_Abrvtn</span> <span class="op">==</span> <span class="st">"CT"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">fips</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span></span>
+<span>    Missing_NCHSURC <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">nchsurc</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    N <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html">n</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://sfirke.github.io/janitor/reference/adorn_totals.html">adorn_totals</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>  fips Missing_NCHSURC    N
+ 09009               0 2274
+ 09003               0 1957
+ 09001               0 1108
+ 09011               0  592
+ 09007               0  364
+ 09013               0  270
+ 09015               0  236
+ 09005               0  211
+ Total               0 7012</code></pre>
+</div>
+</div>
+<p>Apparently filtering counties formed after 2014 from the USGS dataset has obviated the issue of CT updating its counties.</p>
+</section><section id="set-urbanrural-classification" class="level2"><h2 class="anchored" data-anchor-id="set-urbanrural-classification">Set Urban/Rural Classification</h2>
+<p>Cleanup: Correct values of query and state, remove unneeded variables, etc:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_nchsurc</span> <span class="op">&lt;-</span> <span class="va">data_nchsurc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># Remove unneeded variables</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">city_fixed</span>, <span class="op">-</span><span class="va">fips0</span>, <span class="op">-</span><span class="va">fips1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="co"># relocate address variables to after Prscrbr_State_FIPS</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/relocate.html">relocate</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html">any_of</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Prscrbr_St1"</span>, <span class="st">"Prscrbr_St2"</span>, <span class="st">"Prscrbr_zip5"</span>, <span class="st">"address"</span>, <span class="st">"fips"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    .after <span class="op">=</span> <span class="va">Prscrbr_State_FIPS</span></span>
+<span>    <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># check for missing values</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">data_nchsurc</span><span class="op">$</span><span class="va">query0</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb26"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span><span class="op">(</span><span class="va">data_nchsurc</span><span class="op">$</span><span class="va">fips</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>view values of nchsurc$nchsurc</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_nchsurc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span><span class="op">(</span><span class="va">nchsurc</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarise</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html">n</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  nchsurc      n
+    &lt;dbl&gt;  &lt;int&gt;
+1       1 147048
+2       3 120724
+3       2 106251
+4       4  58466
+5       5  46871
+6       6  26035</code></pre>
+</div>
+</div>
+<p>set urban/rural classification</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb30"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_nchsurc</span><span class="op">$</span><span class="va">ur</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html">if_else</a></span><span class="op">(</span></span>
+<span>  <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">nchsurc</span> <span class="op"><a href="https://rdrr.io/r/base/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"5"</span>, <span class="st">"6"</span><span class="op">)</span>,     <span class="co"># if nchsurc is rural</span></span>
+<span>  <span class="st">"rural"</span>,                                   <span class="co"># then rural</span></span>
+<span>  <span class="st">"urban"</span>,                                   <span class="co"># else urban</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Tabulate condensed RUCA class vs NCHSURC</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb31"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_nchsurc</span><span class="op">$</span><span class="va">RUCA_class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span></span>
+<span>    <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">Prscrbr_RUCA</span> <span class="op">&lt;</span> <span class="fl">4</span> <span class="op">~</span> <span class="st">"Metropolitan"</span>,</span>
+<span>    <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">Prscrbr_RUCA</span> <span class="op">&lt;</span> <span class="fl">7</span> <span class="op">~</span> <span class="st">"Micropolitan"</span>,</span>
+<span>    <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">Prscrbr_RUCA</span> <span class="op">&lt;</span> <span class="fl">10</span> <span class="op">~</span> <span class="st">"Small Town"</span>,</span>
+<span>    <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">Prscrbr_RUCA</span> <span class="op">&lt;</span> <span class="fl">99</span> <span class="op">~</span> <span class="st">"Rural"</span>,</span>
+<span>    .default <span class="op">=</span> <span class="st">"Not Coded"</span><span class="op">)</span></span>
+<span><span class="va">data_nchsurc</span><span class="op">$</span><span class="va">NCHSURC_class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html">case_when</a></span><span class="op">(</span></span>
+<span>    <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">nchsurc</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">~</span> <span class="st">"Large central metro"</span>,</span>
+<span>    <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">nchsurc</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">~</span> <span class="st">"Large fringe metro"</span>,</span>
+<span>    <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">nchsurc</span> <span class="op">==</span> <span class="fl">3</span> <span class="op">~</span> <span class="st">"Medium metro"</span>,</span>
+<span>    <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">nchsurc</span> <span class="op">==</span> <span class="fl">4</span> <span class="op">~</span> <span class="st">"Small metro"</span>,</span>
+<span>    <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">nchsurc</span> <span class="op">==</span> <span class="fl">5</span> <span class="op">~</span> <span class="st">"Micropolitan"</span>,</span>
+<span>    <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">nchsurc</span> <span class="op">==</span> <span class="fl">6</span> <span class="op">~</span> <span class="st">"Non-core"</span><span class="op">)</span></span>
+<span><span class="co"># table</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html">table</a></span><span class="op">(</span><span class="va">data_nchsurc</span><span class="op">$</span><span class="va">RUCA_class</span>, <span class="va">data_nchsurc</span><span class="op">$</span><span class="va">nchsurc</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>              
+                    1      2      3      4      5      6
+  Metropolitan 146713 100199 114861  53812   2245   1978
+  Micropolitan     44   4314   3516   2256  38590   1143
+  Not Coded       225     89    112     45     27     81
+  Rural             4    273    477    690   2559   6717
+  Small Town       62   1376   1758   1663   3450  16116</code></pre>
+</div>
+</div>
+<p>Cleanup and reorder variables</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb33"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">data_nchsurc</span> <span class="op">&lt;-</span> <span class="va">data_nchsurc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/relocate.html">relocate</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html">any_of</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Prscrbr_RUCA"</span>, <span class="st">"RUCA_class"</span>, <span class="st">"nchsurc"</span>, <span class="st">"NCHSURC_class"</span>, <span class="st">"ur"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    .after <span class="op">=</span> <span class="va">fips_manual</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section></section><section id="save-datasets" class="level1"><h1>Save datasets</h1>
+<p>Save datasets, and cleanup:</p>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb34"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span></span>
+<span>  <span class="va">data_nchsurc</span>,</span>
+<span>  file <span class="op">=</span> <span class="st">"dataset/data_nchsurc.RData"</span>,</span>
+<span>  compress <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  compression_level <span class="op">=</span> <span class="fl">9</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section><section id="other-thoughts" class="level1"><h1>Other Thoughts</h1>
+<p>Indication for OUD use (vs pain or EtOH use disorder) is a potential source of error when classifying prescriptions in the <code>tx</code> variable. Consider future methods to potentially validate OUD vs pain treatment designations (as time allows):</p>
+<ul>
+<li>Classify prescriptions as OUD vs pain vs EtOH use disorder based on KNN of names of other drugs prescribed by the provider</li>
+<li>Query <a href="https://open.fda.gov/apis/drug/ndc/how-to-use-the-endpoint/">FDA NDC DB</a> for NPIs associated with the values of <code>Brnd_Name</code> and <code>Gnrc_Name</code> which were matched above, then search those NDCs for the indication for use on DailyMed</li>
+<li>Check DEA X waver for prescriber’s NPI</li>
+<li>Check prescriber’s buprenorphine panel limit vs count of buprenorphine prescribed</li>
+<li>Check prescriber’s place of work in NPI DB</li>
+<li>interrogate/validate CMS’s method for translating a drug’s NDC into a drug’s brand and generic names</li>
+<li>recalculate the rural-urban classification for each year using the <a href="https://www.census.gov/programs-surveys/popest/data/data-sets.html">census estimates</a>
+</li>
+</ul>
+<p>Translation from NDC to a drug’s brand/generic names likely simplifies many analyses, but could be a significant source of bias for our analysis.</p>
+<section id="alternate-approaches-to-geocoding-reverse-geocoding-nchsurc-classification" class="level2"><h2 class="anchored" data-anchor-id="alternate-approaches-to-geocoding-reverse-geocoding-nchsurc-classification">Alternate Approaches to Geocoding, Reverse Geocoding &amp; NCHSURC classification</h2>
+<p>Alternate geocoding:</p>
+<ul>
+<li>The <code>geocode()</code> function from the <code>ggmap</code> package to find the coordinates for each city/state combination. The function will return a dataframe with the coordinates for each city/state combination, and will also return a status code indicating whether the coordinates were found successfully. We will use the status code to filter out any entries for which the coordinates were not found. This method requires access to the google API.</li>
+</ul>
+<p>Alternate reverse-geocoding:</p>
+<ul>
+<li>The <code>fips()</code> function from the <code>USAboundaries</code> package to convert the coordinates to FIPS code. This function uses the <code>sf</code> package to find the FIPS code for the county in which the coordinates are located. This method is the most straightforward, but it is also the slowest.</li>
+<li>The <code>fips()</code> function from the <code>tigris</code> package to convert the coordinates to FIPS code. This function uses the <code>sf</code> package to find the FIPS code for the county in which the coordinates are located. This method is faster than the <code>USAboundaries</code> method, but it is still relatively slow.</li>
+<li>The <code>fips()</code> function from the <code>MazamaSpatialUtils</code> package to convert the coordinates to FIPS code. This function uses a lookup table to find the FIPS code for the county in which the coordinates are located. This method is the fastest, but it is also the least accurate. The lookup table is based on the 2010 census, so it will not include any counties that were created after 2010. This method will also not work for any coordinates that are outside of the US.</li>
+</ul>
+<p>Rural-urban classification:</p>
+<ul>
+<li>Lookup rural-urban clssification: For this step we can used CDC’s <a href="https://www.cdc.gov/nchs/data_access/urban_rural.htm">2013 Urban-Rural Classification Scheme for Counties</a>; specifically the <a href="https://www.cdc.gov/nchs/data/data_acces_files/NCHSURCodes2013.xlsx">NCHSurbruralcodes Spreadsheet</a> which contains the FIPS codes and rural-urban classifications for each county in the US. The data can be plotted according to FIPS code using <code>ggplot2</code> or <code>MazamaSpatialPlots</code> packages.</li>
+<li>Alternatively the classification could be manually recalculated from census data for each year.</li>
+</ul></section></section><section id="session-info" class="level1"><h1>Session Info</h1>
+<div class="cell">
+<details open=""><summary>Code</summary><div class="sourceCode" id="cb35"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>R version 4.4.0 (2024-04-24)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 22.04.4 LTS
+
+Matrix products: default
+BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+time zone: America/Vancouver
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] readxl_1.4.3      data.table_1.15.0 fst_0.9.8         janitor_2.2.0    
+ [5] lubridate_1.9.3   forcats_1.0.0     stringr_1.5.1     dplyr_1.1.4      
+ [9] purrr_1.0.2       readr_2.1.5       tidyr_1.3.1       tibble_3.2.1     
+[13] ggplot2_3.4.4     tidyverse_2.0.0  
+
+loaded via a namespace (and not attached):
+ [1] utf8_1.2.4        generics_0.1.3    stringi_1.8.3     hms_1.1.3        
+ [5] digest_0.6.34     magrittr_2.0.3    evaluate_0.23     grid_4.4.0       
+ [9] timechange_0.3.0  fastmap_1.1.1     cellranger_1.1.0  jsonlite_1.8.8   
+[13] fansi_1.0.6       scales_1.3.0      cli_3.6.2         rlang_1.1.3      
+[17] munsell_0.5.0     withr_3.0.0       yaml_2.3.8        tools_4.4.0      
+[21] parallel_4.4.0    tzdb_0.4.0        fstcore_0.9.18    colorspace_2.1-0 
+[25] vctrs_0.6.5       R6_2.5.1          lifecycle_1.0.4   snakecase_0.11.1 
+[29] htmlwidgets_1.6.4 pkgconfig_2.0.3   pillar_1.9.0      gtable_0.3.4     
+[33] glue_1.7.0        Rcpp_1.0.12       xfun_0.43         tidyselect_1.2.1 
+[37] rstudioapi_0.15.0 knitr_1.46        htmltools_0.5.8.1 rmarkdown_2.26   
+[41] compiler_4.4.0   </code></pre>
+</div>
+</div>
+<!-- -->
+
+</section></main><!-- /main column --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb37" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Dataset - Rural-Urban Classification"</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Matthew Hoctor, PharmD"</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> last-modified</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="co">quarto::html_document:</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="co">  theme: cerulean</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="co">  highlight: github</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a><span class="an">toc:</span><span class="co"> true</span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="an">toc-depth:</span><span class="co"> 4</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a><span class="an">toc-location:</span><span class="co"> left</span></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a><span class="an">toc-title:</span><span class="co"> Contents</span></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a><span class="an">code-fold:</span><span class="co"> show</span></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a><span class="an">code-overflow:</span><span class="co"> wrap</span></span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a><span class="an">code-tools:</span><span class="co"> true</span></span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a><span class="an">code-link:</span><span class="co"> true</span></span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span><span class="co"> source</span></span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
+<span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a><span class="do">## load libraries:</span></span>
+<span id="cb37-28"><a href="#cb37-28" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)      <span class="co"># dplyr, lubridate, stringr, etc, etc, etc</span></span>
+<span id="cb37-29"><a href="#cb37-29" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor)        <span class="co"># adorn_totals()</span></span>
+<span id="cb37-30"><a href="#cb37-30" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fst)            <span class="co"># read/write .fst files</span></span>
+<span id="cb37-31"><a href="#cb37-31" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)     <span class="co"># ?is this package necessary?</span></span>
+<span id="cb37-32"><a href="#cb37-32" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)         <span class="co"># read excel files</span></span>
+<span id="cb37-33"><a href="#cb37-33" aria-hidden="true" tabindex="-1"></a><span class="co"># library(readODS)      # to read .ods file</span></span>
+<span id="cb37-34"><a href="#cb37-34" aria-hidden="true" tabindex="-1"></a><span class="co"># library(campfin)      # for working with abbreviations in US place names</span></span>
+<span id="cb37-35"><a href="#cb37-35" aria-hidden="true" tabindex="-1"></a><span class="co"># library(SUNGEO)       # for batch geocoding from OSM</span></span>
+<span id="cb37-36"><a href="#cb37-36" aria-hidden="true" tabindex="-1"></a><span class="co"># library(fipio)        # coords_to_fips()</span></span>
+<span id="cb37-37"><a href="#cb37-37" aria-hidden="true" tabindex="-1"></a><span class="co"># library(zipcodeR)     # for finding zipcode centroid coords</span></span>
+<span id="cb37-38"><a href="#cb37-38" aria-hidden="true" tabindex="-1"></a><span class="co"># library(tidygeocoder) # for batch geocoding from multiple sources in parallel</span></span>
+<span id="cb37-39"><a href="#cb37-39" aria-hidden="true" tabindex="-1"></a><span class="co"># library(tidycensus)   # ?county name to FIPS?</span></span>
+<span id="cb37-40"><a href="#cb37-40" aria-hidden="true" tabindex="-1"></a><span class="co"># library(tigris)       # counties(): download year-specific county data</span></span>
+<span id="cb37-41"><a href="#cb37-41" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-42"><a href="#cb37-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-43"><a href="#cb37-43" aria-hidden="true" tabindex="-1"></a><span class="fu"># Overview</span></span>
+<span id="cb37-44"><a href="#cb37-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-45"><a href="#cb37-45" aria-hidden="true" tabindex="-1"></a>This project looks to understand the impact of the Comprehensive Addiction and Recovery Act (CARA) of 2016 on patterns of buprenorphine prescribing practices by examining openly available medicare part D data.</span>
+<span id="cb37-46"><a href="#cb37-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-47"><a href="#cb37-47" aria-hidden="true" tabindex="-1"></a>The steps in this page require that the data be downloaded first (see the <span class="co">[</span><span class="ot">data download</span><span class="co">](https://matthew-hoctor.github.io/BupRx/dl.html)</span> page), and for the <span class="co">[</span><span class="ot">treatment variables</span><span class="co">](https://matthew-hoctor.github.io/BupRx/dataset_tx.html)</span> to be compiled.  The scripts below show the data generation process.</span>
+<span id="cb37-48"><a href="#cb37-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-49"><a href="#cb37-49" aria-hidden="true" tabindex="-1"></a>Using the USGS Populated Places dataset, we will attempt to convert the city/state data from the dataset into a a FIPS code, which will be used to lookup the CDC's 2013 Urban-Rural Classification using the following steps:</span>
+<span id="cb37-50"><a href="#cb37-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-51"><a href="#cb37-51" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>The USGS dataset (which can be found as a text file within their Geographic Names Information System (GNIS) <span class="co">[</span><span class="ot">here</span><span class="co">](https://www.usgs.gov/us-board-on-geographic-names/download-gnis-data)</span>) contains several variables including the state name/FIPS, the 'map name' (which is often the city name), and the county name/FIPS.  The first step will be to lookup the city/state in this dataset and retrieve the full FIPS.</span>
+<span id="cb37-52"><a href="#cb37-52" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Lookup rural-urban clssification: For this step we can use the FIPS code to lookup the CDC's <span class="co">[</span><span class="ot">2013 Urban-Rural Classification Scheme for Counties</span><span class="co">](https://www.cdc.gov/nchs/data_access/urban_rural.htm)</span>; specifically using the <span class="co">[</span><span class="ot">NCHSurbruralcodes Spreadsheet</span><span class="co">](https://www.cdc.gov/nchs/data/data_acces_files/NCHSURCodes2013.xlsx)</span> which contains the FIPS codes and rural-urban classifications for each county in the US.</span>
+<span id="cb37-53"><a href="#cb37-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-54"><a href="#cb37-54" aria-hidden="true" tabindex="-1"></a>NB the CDC provides a helpful summary of <span class="co">[</span><span class="ot">County Geography Changes: 1990-present</span><span class="co">](https://www.cdc.gov/nchs/nvss/bridged_race/county_geography-_changes1990-present.pdf)</span>.</span>
+<span id="cb37-55"><a href="#cb37-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-56"><a href="#cb37-56" aria-hidden="true" tabindex="-1"></a><span class="fu"># Load data</span></span>
+<span id="cb37-57"><a href="#cb37-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-60"><a href="#cb37-60" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-61"><a href="#cb37-61" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: load_datasets</span></span>
+<span id="cb37-62"><a href="#cb37-62" aria-hidden="true" tabindex="-1"></a><span class="co">#| output: false</span></span>
+<span id="cb37-63"><a href="#cb37-63" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the dataset from the prior step:</span></span>
+<span id="cb37-64"><a href="#cb37-64" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"dataset/data_fips.RData"</span>)</span>
+<span id="cb37-65"><a href="#cb37-65" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="at">file =</span> <span class="st">"dataset/addresses_geo.RData"</span>)</span>
+<span id="cb37-66"><a href="#cb37-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-67"><a href="#cb37-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-68"><a href="#cb37-68" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the NCHSURC dataset:</span></span>
+<span id="cb37-69"><a href="#cb37-69" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: NCHSURC_dataset</span></span>
+<span id="cb37-70"><a href="#cb37-70" aria-hidden="true" tabindex="-1"></a>nchsurc <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(</span>
+<span id="cb37-71"><a href="#cb37-71" aria-hidden="true" tabindex="-1"></a>  <span class="st">"data/NCHSURCodes2013.xlsx"</span>,</span>
+<span id="cb37-72"><a href="#cb37-72" aria-hidden="true" tabindex="-1"></a>  <span class="at">col_names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb37-73"><a href="#cb37-73" aria-hidden="true" tabindex="-1"></a>  <span class="co"># rename the FIPS code NCHSURC variables (to make the left_join simpler):</span></span>
+<span id="cb37-74"><a href="#cb37-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">fips =</span> <span class="st">`</span><span class="at">FIPS code</span><span class="st">`</span>, <span class="at">nchsurc =</span> <span class="st">`</span><span class="at">2013 code</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb37-75"><a href="#cb37-75" aria-hidden="true" tabindex="-1"></a>  <span class="co"># convert the numerical value of the fips variable to a 5-numeral character</span></span>
+<span id="cb37-76"><a href="#cb37-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fips =</span> <span class="fu">str_pad</span>(fips, <span class="at">width =</span> <span class="dv">5</span>, <span class="at">pad =</span> <span class="st">"0"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb37-77"><a href="#cb37-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(fips, nchsurc)</span>
+<span id="cb37-78"><a href="#cb37-78" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-79"><a href="#cb37-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-80"><a href="#cb37-80" aria-hidden="true" tabindex="-1"></a><span class="fu"># Manual fips codes</span></span>
+<span id="cb37-81"><a href="#cb37-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-84"><a href="#cb37-84" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-85"><a href="#cb37-85" aria-hidden="true" tabindex="-1"></a>addresses_geo <span class="sc">|&gt;</span></span>
+<span id="cb37-86"><a href="#cb37-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(fips_geo) <span class="sc">&amp;</span> (group <span class="sc">==</span> <span class="st">"geocode"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb37-87"><a href="#cb37-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Prscrbr_State_Abrvtn, Prscrbr_City) <span class="sc">|&gt;</span></span>
+<span id="cb37-88"><a href="#cb37-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(address)</span>
+<span id="cb37-89"><a href="#cb37-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-90"><a href="#cb37-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-93"><a href="#cb37-93" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-94"><a href="#cb37-94" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: manual_search</span></span>
+<span id="cb37-95"><a href="#cb37-95" aria-hidden="true" tabindex="-1"></a>data_fips <span class="ot">&lt;-</span> data_fips <span class="sc">|&gt;</span>                                   <span class="co"># x dataset</span></span>
+<span id="cb37-96"><a href="#cb37-96" aria-hidden="true" tabindex="-1"></a> <span class="fu">left_join</span>(</span>
+<span id="cb37-97"><a href="#cb37-97" aria-hidden="true" tabindex="-1"></a>   <span class="fu">data.frame</span>(                                              <span class="co"># y dataset</span></span>
+<span id="cb37-98"><a href="#cb37-98" aria-hidden="true" tabindex="-1"></a>     <span class="at">address =</span> <span class="fu">c</span>( <span class="co"># 0</span></span>
+<span id="cb37-99"><a href="#cb37-99" aria-hidden="true" tabindex="-1"></a>       <span class="st">"221 E Hampden Ave, Englewood, CO 80113"</span>,            <span class="co"># 1</span></span>
+<span id="cb37-100"><a href="#cb37-100" aria-hidden="true" tabindex="-1"></a>       <span class="st">"499 E Hampden Ave, Englewood, CO 80113"</span>,</span>
+<span id="cb37-101"><a href="#cb37-101" aria-hidden="true" tabindex="-1"></a>       <span class="st">"601 E Hampden Ave, Englewood, CO 80113"</span>,</span>
+<span id="cb37-102"><a href="#cb37-102" aria-hidden="true" tabindex="-1"></a>       <span class="st">"799 E Hampden Avenue, Englewood, CO 80113"</span>,</span>
+<span id="cb37-103"><a href="#cb37-103" aria-hidden="true" tabindex="-1"></a>       <span class="st">"799 E Hampden Ave, Englewood, CO 80113"</span>,</span>
+<span id="cb37-104"><a href="#cb37-104" aria-hidden="true" tabindex="-1"></a>       <span class="st">"2955 S Broadway, Englewood, CO 80113"</span>,</span>
+<span id="cb37-105"><a href="#cb37-105" aria-hidden="true" tabindex="-1"></a>       <span class="st">"701 E Hampden Ave, Englewood, CO 80113"</span>,</span>
+<span id="cb37-106"><a href="#cb37-106" aria-hidden="true" tabindex="-1"></a>       <span class="st">"3333 S Bannock St, Englewood, CO 80110"</span>,</span>
+<span id="cb37-107"><a href="#cb37-107" aria-hidden="true" tabindex="-1"></a>       <span class="st">"3277 S Lincoln St, Englewood, CO 80113"</span>,</span>
+<span id="cb37-108"><a href="#cb37-108" aria-hidden="true" tabindex="-1"></a>       <span class="st">"499 E Hampden Ave Ste 220, Englewood, CO 80113"</span>,    <span class="co"># 10</span></span>
+<span id="cb37-109"><a href="#cb37-109" aria-hidden="true" tabindex="-1"></a>       <span class="st">"499 East Hampden Avenue, Englewood, CO 80113"</span>,</span>
+<span id="cb37-110"><a href="#cb37-110" aria-hidden="true" tabindex="-1"></a>       <span class="st">"799 E Hampden Ave Ste 315, Englewood, CO 80113"</span>,</span>
+<span id="cb37-111"><a href="#cb37-111" aria-hidden="true" tabindex="-1"></a>       <span class="st">"3330 S Broadway, Englewood, CO 80151"</span>,</span>
+<span id="cb37-112"><a href="#cb37-112" aria-hidden="true" tabindex="-1"></a>       <span class="st">"499 E Hampden Ave Ste 100, Englewood, CO 80113"</span>,</span>
+<span id="cb37-113"><a href="#cb37-113" aria-hidden="true" tabindex="-1"></a>       <span class="st">"750 W Hampden Ave Ste 105, Englewood, CO 80110"</span>,</span>
+<span id="cb37-114"><a href="#cb37-114" aria-hidden="true" tabindex="-1"></a>       <span class="st">"3701 S Broadway, Englewood, CO 80113"</span>,</span>
+<span id="cb37-115"><a href="#cb37-115" aria-hidden="true" tabindex="-1"></a>       <span class="st">"3515 S Delaware St, Englewood, CO 80110"</span>,</span>
+<span id="cb37-116"><a href="#cb37-116" aria-hidden="true" tabindex="-1"></a>       <span class="st">"3460 S Federal Blvd, Englewood, CO 80110"</span>,</span>
+<span id="cb37-117"><a href="#cb37-117" aria-hidden="true" tabindex="-1"></a>       <span class="st">"799 E Hampden Ave Ste 300, Englewood, CO 80113"</span>,</span>
+<span id="cb37-118"><a href="#cb37-118" aria-hidden="true" tabindex="-1"></a>       <span class="st">"499 E Hampden Ave Ste 360, Englewood, CO 80113"</span>,    <span class="co"># 20</span></span>
+<span id="cb37-119"><a href="#cb37-119" aria-hidden="true" tabindex="-1"></a>       <span class="st">"730 W. Hampden Ave., Englewood, CO 80110"</span>,</span>
+<span id="cb37-120"><a href="#cb37-120" aria-hidden="true" tabindex="-1"></a>       <span class="st">"5257 S Wadsworth Blvd, Littleton, CO 80123"</span>,</span>
+<span id="cb37-121"><a href="#cb37-121" aria-hidden="true" tabindex="-1"></a>       <span class="st">"6169 S Balsam Way, Littleton, CO 80123"</span>,</span>
+<span id="cb37-122"><a href="#cb37-122" aria-hidden="true" tabindex="-1"></a>       <span class="st">"6179 S Balsam Way, Littleton, CO 80123"</span>,</span>
+<span id="cb37-123"><a href="#cb37-123" aria-hidden="true" tabindex="-1"></a>       <span class="st">"6901 S Pierce St, Littleton, CO 80128"</span>,</span>
+<span id="cb37-124"><a href="#cb37-124" aria-hidden="true" tabindex="-1"></a>       <span class="st">"7335 S Pierce St, Littleton, CO 80128"</span>,</span>
+<span id="cb37-125"><a href="#cb37-125" aria-hidden="true" tabindex="-1"></a>       <span class="st">"6169 South Balsam Way, Littleton, CO 80123"</span>,</span>
+<span id="cb37-126"><a href="#cb37-126" aria-hidden="true" tabindex="-1"></a>       <span class="st">"7325 S Pierce St Ste 102, Littleton, CO 80128"</span>,</span>
+<span id="cb37-127"><a href="#cb37-127" aria-hidden="true" tabindex="-1"></a>       <span class="st">"5066 S Wadsworth Blvd, Littleton, CO 80123"</span>,</span>
+<span id="cb37-128"><a href="#cb37-128" aria-hidden="true" tabindex="-1"></a>       <span class="st">"7345 S Pierce St Ste 110, Littleton, CO 80128"</span>,    <span class="co">#30</span></span>
+<span id="cb37-129"><a href="#cb37-129" aria-hidden="true" tabindex="-1"></a>       <span class="st">"107b Ala Malama St, Kaunakakai, HI 96748"</span>,</span>
+<span id="cb37-130"><a href="#cb37-130" aria-hidden="true" tabindex="-1"></a>       <span class="st">"30 Oki Place, Kaunakakai, HI 96748"</span>,</span>
+<span id="cb37-131"><a href="#cb37-131" aria-hidden="true" tabindex="-1"></a>       <span class="st">"28 Kamoi St, Kaunakakai, HI 96748"</span>,</span>
+<span id="cb37-132"><a href="#cb37-132" aria-hidden="true" tabindex="-1"></a>       <span class="st">"30 Oki Place #2040, Kaunakakai, HI 96748"</span>,</span>
+<span id="cb37-133"><a href="#cb37-133" aria-hidden="true" tabindex="-1"></a>       <span class="st">"112 Champagne Blvd, Breaux Bridge, LA 70517"</span>,</span>
+<span id="cb37-134"><a href="#cb37-134" aria-hidden="true" tabindex="-1"></a>       <span class="st">"1555 Gary Dr Ste C, Breaux Bridge, LA 70517"</span>,</span>
+<span id="cb37-135"><a href="#cb37-135" aria-hidden="true" tabindex="-1"></a>       <span class="st">"209 Champagne Blvd., Breaux Bridge, LA 70517"</span>,</span>
+<span id="cb37-136"><a href="#cb37-136" aria-hidden="true" tabindex="-1"></a>       <span class="st">"548 Lakes Blvd, Breaux Bridge, LA 70517"</span>,</span>
+<span id="cb37-137"><a href="#cb37-137" aria-hidden="true" tabindex="-1"></a>       <span class="st">"131 Emerald St, Wrentham, MA 02093"</span>,</span>
+<span id="cb37-138"><a href="#cb37-138" aria-hidden="true" tabindex="-1"></a>       <span class="st">"6020 Richmond Hwy Ste 100, Alexandria, VA 22303"</span>, <span class="co"># 40</span></span>
+<span id="cb37-139"><a href="#cb37-139" aria-hidden="true" tabindex="-1"></a>       <span class="st">"6201 Centreville Rd, Centreville, VA 20121"</span>,</span>
+<span id="cb37-140"><a href="#cb37-140" aria-hidden="true" tabindex="-1"></a>       <span class="st">"13880 Braddock Rd, Centreville, VA 20121"</span>,</span>
+<span id="cb37-141"><a href="#cb37-141" aria-hidden="true" tabindex="-1"></a>       <span class="st">"6138 Redwood Square Ctr Ste 204, Centreville, VA 20121"</span>,</span>
+<span id="cb37-142"><a href="#cb37-142" aria-hidden="true" tabindex="-1"></a>       <span class="st">"247 Ramble Rd, Collinsville, VA 24078"</span>,</span>
+<span id="cb37-143"><a href="#cb37-143" aria-hidden="true" tabindex="-1"></a>       <span class="st">"3155 Earlysville Rd, Earlysville, VA 22936"</span>,</span>
+<span id="cb37-144"><a href="#cb37-144" aria-hidden="true" tabindex="-1"></a>       <span class="st">"9901 Braddock Rd, Fairfax, VA 22032"</span>,</span>
+<span id="cb37-145"><a href="#cb37-145" aria-hidden="true" tabindex="-1"></a>       <span class="st">"4887 Wheatstone Dr, Fairfax, VA 22032"</span>,</span>
+<span id="cb37-146"><a href="#cb37-146" aria-hidden="true" tabindex="-1"></a>       <span class="st">"3058 River Rd W, Goochland, VA 23063"</span>, </span>
+<span id="cb37-147"><a href="#cb37-147" aria-hidden="true" tabindex="-1"></a>       <span class="st">"3737 W Main St Ste 101, Salem, VA 24153"</span>,</span>
+<span id="cb37-148"><a href="#cb37-148" aria-hidden="true" tabindex="-1"></a>       <span class="st">"160 Warrior Dr, Stephens City, VA 22655"</span>,        <span class="co"># 50</span></span>
+<span id="cb37-149"><a href="#cb37-149" aria-hidden="true" tabindex="-1"></a>       <span class="st">"640 Warrior Dr, Stephens City, VA 22655"</span>,</span>
+<span id="cb37-150"><a href="#cb37-150" aria-hidden="true" tabindex="-1"></a>       <span class="st">"13199 Centerpointe Way, Woodbridge, VA 22193"</span>,</span>
+<span id="cb37-151"><a href="#cb37-151" aria-hidden="true" tabindex="-1"></a>       <span class="st">"2296 Opitz Blvd, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-152"><a href="#cb37-152" aria-hidden="true" tabindex="-1"></a>       <span class="st">"14904 Jefferson Davis Hwy, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-153"><a href="#cb37-153" aria-hidden="true" tabindex="-1"></a>       <span class="st">"1954 Opitz Blvd # 7, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-154"><a href="#cb37-154" aria-hidden="true" tabindex="-1"></a>       <span class="st">"14139 Potomac Mills Rd, Woodbridge, VA 22193"</span>,</span>
+<span id="cb37-155"><a href="#cb37-155" aria-hidden="true" tabindex="-1"></a>       <span class="st">"2022 Opitz Blvd Ste B, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-156"><a href="#cb37-156" aria-hidden="true" tabindex="-1"></a>       <span class="st">"2200 Opitz Blvd Ste 235, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-157"><a href="#cb37-157" aria-hidden="true" tabindex="-1"></a>       <span class="st">"2280 Opitz Blvd, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-158"><a href="#cb37-158" aria-hidden="true" tabindex="-1"></a>       <span class="st">"2200 Opitz Blvd, Woodbridge, VA 22191"</span>,         <span class="co"># 60</span></span>
+<span id="cb37-159"><a href="#cb37-159" aria-hidden="true" tabindex="-1"></a>       <span class="st">"14605 Potomac Branch Dr, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-160"><a href="#cb37-160" aria-hidden="true" tabindex="-1"></a>       <span class="st">"1954 Opitz Blvd Unit 7, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-161"><a href="#cb37-161" aria-hidden="true" tabindex="-1"></a>       <span class="st">"14605 Potomac Branch Dr Ste 100, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-162"><a href="#cb37-162" aria-hidden="true" tabindex="-1"></a>       <span class="st">"13168 Centerpointe Way, Woodbridge, VA 22193"</span>,</span>
+<span id="cb37-163"><a href="#cb37-163" aria-hidden="true" tabindex="-1"></a>       <span class="st">"1954 Opitz Blvd, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-164"><a href="#cb37-164" aria-hidden="true" tabindex="-1"></a>       <span class="st">"2010 Opitz Blvd Ste A, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-165"><a href="#cb37-165" aria-hidden="true" tabindex="-1"></a>       <span class="st">"1900 Opitz Blvd Ste F, Woodbridge, VA 22191"</span>,</span>
+<span id="cb37-166"><a href="#cb37-166" aria-hidden="true" tabindex="-1"></a>       <span class="st">"5808 Mapledale Plz, Woodbridge, VA 22193"</span>,</span>
+<span id="cb37-167"><a href="#cb37-167" aria-hidden="true" tabindex="-1"></a>       <span class="st">"2701 Neabsco Common Pl, Woodbridge, VA 22191"</span>),</span>
+<span id="cb37-168"><a href="#cb37-168" aria-hidden="true" tabindex="-1"></a>     <span class="at">fips_manual =</span> <span class="fu">c</span>(</span>
+<span id="cb37-169"><a href="#cb37-169" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08031"</span>, <span class="co"># 1</span></span>
+<span id="cb37-170"><a href="#cb37-170" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-171"><a href="#cb37-171" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-172"><a href="#cb37-172" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-173"><a href="#cb37-173" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-174"><a href="#cb37-174" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-175"><a href="#cb37-175" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-176"><a href="#cb37-176" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-177"><a href="#cb37-177" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-178"><a href="#cb37-178" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>, <span class="co"># 10</span></span>
+<span id="cb37-179"><a href="#cb37-179" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>, </span>
+<span id="cb37-180"><a href="#cb37-180" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-181"><a href="#cb37-181" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-182"><a href="#cb37-182" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-183"><a href="#cb37-183" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-184"><a href="#cb37-184" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-185"><a href="#cb37-185" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-186"><a href="#cb37-186" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08031"</span>,</span>
+<span id="cb37-187"><a href="#cb37-187" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>,</span>
+<span id="cb37-188"><a href="#cb37-188" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>, <span class="co"># 20</span></span>
+<span id="cb37-189"><a href="#cb37-189" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08005"</span>, </span>
+<span id="cb37-190"><a href="#cb37-190" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08059"</span>,</span>
+<span id="cb37-191"><a href="#cb37-191" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08059"</span>,</span>
+<span id="cb37-192"><a href="#cb37-192" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08059"</span>,</span>
+<span id="cb37-193"><a href="#cb37-193" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08059"</span>,</span>
+<span id="cb37-194"><a href="#cb37-194" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08059"</span>,</span>
+<span id="cb37-195"><a href="#cb37-195" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08059"</span>,</span>
+<span id="cb37-196"><a href="#cb37-196" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08059"</span>,</span>
+<span id="cb37-197"><a href="#cb37-197" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08059"</span>,</span>
+<span id="cb37-198"><a href="#cb37-198" aria-hidden="true" tabindex="-1"></a>       <span class="st">"08059"</span>, <span class="co"># 30</span></span>
+<span id="cb37-199"><a href="#cb37-199" aria-hidden="true" tabindex="-1"></a>       <span class="st">"15005"</span>, </span>
+<span id="cb37-200"><a href="#cb37-200" aria-hidden="true" tabindex="-1"></a>       <span class="st">"15009"</span>,</span>
+<span id="cb37-201"><a href="#cb37-201" aria-hidden="true" tabindex="-1"></a>       <span class="st">"15009"</span>,</span>
+<span id="cb37-202"><a href="#cb37-202" aria-hidden="true" tabindex="-1"></a>       <span class="st">"15009"</span>,</span>
+<span id="cb37-203"><a href="#cb37-203" aria-hidden="true" tabindex="-1"></a>       <span class="st">"22099"</span>,</span>
+<span id="cb37-204"><a href="#cb37-204" aria-hidden="true" tabindex="-1"></a>       <span class="st">"22099"</span>,</span>
+<span id="cb37-205"><a href="#cb37-205" aria-hidden="true" tabindex="-1"></a>       <span class="st">"22099"</span>,</span>
+<span id="cb37-206"><a href="#cb37-206" aria-hidden="true" tabindex="-1"></a>       <span class="st">"22099"</span>,</span>
+<span id="cb37-207"><a href="#cb37-207" aria-hidden="true" tabindex="-1"></a>       <span class="st">"25021"</span>,</span>
+<span id="cb37-208"><a href="#cb37-208" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51059"</span>, <span class="co"># 40</span></span>
+<span id="cb37-209"><a href="#cb37-209" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51059"</span>, </span>
+<span id="cb37-210"><a href="#cb37-210" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51059"</span>,</span>
+<span id="cb37-211"><a href="#cb37-211" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51059"</span>,</span>
+<span id="cb37-212"><a href="#cb37-212" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51089"</span>,</span>
+<span id="cb37-213"><a href="#cb37-213" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51003"</span>,</span>
+<span id="cb37-214"><a href="#cb37-214" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51059"</span>,</span>
+<span id="cb37-215"><a href="#cb37-215" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51059"</span>,</span>
+<span id="cb37-216"><a href="#cb37-216" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51075"</span>,</span>
+<span id="cb37-217"><a href="#cb37-217" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51161"</span>,</span>
+<span id="cb37-218"><a href="#cb37-218" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51069"</span>, <span class="co"># 50</span></span>
+<span id="cb37-219"><a href="#cb37-219" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51069"</span>, </span>
+<span id="cb37-220"><a href="#cb37-220" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-221"><a href="#cb37-221" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-222"><a href="#cb37-222" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-223"><a href="#cb37-223" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-224"><a href="#cb37-224" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-225"><a href="#cb37-225" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-226"><a href="#cb37-226" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-227"><a href="#cb37-227" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-228"><a href="#cb37-228" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>, <span class="co"># 60</span></span>
+<span id="cb37-229"><a href="#cb37-229" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>, </span>
+<span id="cb37-230"><a href="#cb37-230" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-231"><a href="#cb37-231" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-232"><a href="#cb37-232" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-233"><a href="#cb37-233" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-234"><a href="#cb37-234" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-235"><a href="#cb37-235" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-236"><a href="#cb37-236" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>,</span>
+<span id="cb37-237"><a href="#cb37-237" aria-hidden="true" tabindex="-1"></a>       <span class="st">"51153"</span>  <span class="co"># 69</span></span>
+<span id="cb37-238"><a href="#cb37-238" aria-hidden="true" tabindex="-1"></a>     )),</span>
+<span id="cb37-239"><a href="#cb37-239" aria-hidden="true" tabindex="-1"></a>   <span class="at">by =</span> <span class="fu">join_by</span>(address <span class="sc">==</span> address),</span>
+<span id="cb37-240"><a href="#cb37-240" aria-hidden="true" tabindex="-1"></a>   <span class="at">relationship =</span> <span class="st">"many-to-one"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb37-241"><a href="#cb37-241" aria-hidden="true" tabindex="-1"></a>  <span class="co"># fold geocoded fips codes into main fips var</span></span>
+<span id="cb37-242"><a href="#cb37-242" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fips =</span> <span class="fu">if_else</span>(</span>
+<span id="cb37-243"><a href="#cb37-243" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(fips_manual),</span>
+<span id="cb37-244"><a href="#cb37-244" aria-hidden="true" tabindex="-1"></a>    fips_manual, </span>
+<span id="cb37-245"><a href="#cb37-245" aria-hidden="true" tabindex="-1"></a>    fips))</span>
+<span id="cb37-246"><a href="#cb37-246" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-247"><a href="#cb37-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-250"><a href="#cb37-250" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-251"><a href="#cb37-251" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(data_fips<span class="sc">$</span>fips))</span>
+<span id="cb37-252"><a href="#cb37-252" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-253"><a href="#cb37-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-254"><a href="#cb37-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-255"><a href="#cb37-255" aria-hidden="true" tabindex="-1"></a><span class="fu"># Matching to NCHSURC Dataset</span></span>
+<span id="cb37-256"><a href="#cb37-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-257"><a href="#cb37-257" aria-hidden="true" tabindex="-1"></a><span class="fu">## Match</span></span>
+<span id="cb37-258"><a href="#cb37-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-259"><a href="#cb37-259" aria-hidden="true" tabindex="-1"></a>We will proceed to match the FIPS codes in the dataset.  Note that in principle we could recalculate the rural-urban classification for each year using the <span class="co">[</span><span class="ot">census estimates</span><span class="co">](https://www.census.gov/programs-surveys/popest/data/data-sets.html)</span>, but instead will map the dataset onto the 2013 codes so that the variable remains constant over time.  Starting by looking up NCHSUR code, and tabulate how many NA values are there for fips and state:</span>
+<span id="cb37-260"><a href="#cb37-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-263"><a href="#cb37-263" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-264"><a href="#cb37-264" aria-hidden="true" tabindex="-1"></a><span class="co"># match fips to NCHSURC</span></span>
+<span id="cb37-265"><a href="#cb37-265" aria-hidden="true" tabindex="-1"></a>data_nchsurc <span class="ot">&lt;-</span> data_fips <span class="sc">|&gt;</span>       <span class="co"># the 'left' dataset</span></span>
+<span id="cb37-266"><a href="#cb37-266" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb37-267"><a href="#cb37-267" aria-hidden="true" tabindex="-1"></a>    nchsurc,                       <span class="co"># the 'right' dataset</span></span>
+<span id="cb37-268"><a href="#cb37-268" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">join_by</span>(fips <span class="sc">==</span> fips),    <span class="co"># variables must exactly match</span></span>
+<span id="cb37-269"><a href="#cb37-269" aria-hidden="true" tabindex="-1"></a>    <span class="at">relationship =</span> <span class="st">"many-to-one"</span>,  <span class="co"># will not work w/o specifying relation</span></span>
+<span id="cb37-270"><a href="#cb37-270" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-271"><a href="#cb37-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-272"><a href="#cb37-272" aria-hidden="true" tabindex="-1"></a><span class="co"># tabulate missing</span></span>
+<span id="cb37-273"><a href="#cb37-273" aria-hidden="true" tabindex="-1"></a>data_nchsurc <span class="sc">|&gt;</span></span>
+<span id="cb37-274"><a href="#cb37-274" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Prscrbr_State_Abrvtn, fips) <span class="sc">|&gt;</span></span>
+<span id="cb37-275"><a href="#cb37-275" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb37-276"><a href="#cb37-276" aria-hidden="true" tabindex="-1"></a>    <span class="at">Missing_NCHSURC =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(nchsurc)),</span>
+<span id="cb37-277"><a href="#cb37-277" aria-hidden="true" tabindex="-1"></a>    <span class="at">N =</span> <span class="fu">n</span>()</span>
+<span id="cb37-278"><a href="#cb37-278" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb37-279"><a href="#cb37-279" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Missing_NCHSURC <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb37-280"><a href="#cb37-280" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(Missing_NCHSURC)) <span class="sc">|&gt;</span></span>
+<span id="cb37-281"><a href="#cb37-281" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_totals</span>()</span>
+<span id="cb37-282"><a href="#cb37-282" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-283"><a href="#cb37-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-284"><a href="#cb37-284" aria-hidden="true" tabindex="-1"></a><span class="fu">## AK fips codes</span></span>
+<span id="cb37-285"><a href="#cb37-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-286"><a href="#cb37-286" aria-hidden="true" tabindex="-1"></a>How many NA values in AK by fips and place:</span>
+<span id="cb37-287"><a href="#cb37-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-290"><a href="#cb37-290" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-291"><a href="#cb37-291" aria-hidden="true" tabindex="-1"></a>data_nchsurc <span class="sc">|&gt;</span></span>
+<span id="cb37-292"><a href="#cb37-292" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Prscrbr_State_Abrvtn <span class="sc">==</span> <span class="st">"AK"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb37-293"><a href="#cb37-293" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(city_fixed, fips) <span class="sc">|&gt;</span></span>
+<span id="cb37-294"><a href="#cb37-294" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb37-295"><a href="#cb37-295" aria-hidden="true" tabindex="-1"></a>    <span class="at">Missing_NCHSURC =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(nchsurc)),</span>
+<span id="cb37-296"><a href="#cb37-296" aria-hidden="true" tabindex="-1"></a>    <span class="at">N =</span> <span class="fu">n</span>()</span>
+<span id="cb37-297"><a href="#cb37-297" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb37-298"><a href="#cb37-298" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Missing_NCHSURC <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb37-299"><a href="#cb37-299" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(Missing_NCHSURC)) <span class="sc">|&gt;</span></span>
+<span id="cb37-300"><a href="#cb37-300" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_totals</span>()</span>
+<span id="cb37-301"><a href="#cb37-301" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-302"><a href="#cb37-302" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-303"><a href="#cb37-303" aria-hidden="true" tabindex="-1"></a>Revisiting CDC's summary of <span class="co">[</span><span class="ot">County Geography Changes: 1990-present</span><span class="co">](https://www.cdc.gov/nchs/nvss/bridged_race/county_geography-_changes1990-present.pdf)</span>, we can see that the FIPS code 02063 was the "Valdez-Cordova Census Area" (FIPS code 02261) at the time of the NCHSURC dataset.  We can manually update this entry:</span>
+<span id="cb37-304"><a href="#cb37-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-307"><a href="#cb37-307" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-308"><a href="#cb37-308" aria-hidden="true" tabindex="-1"></a>data_nchsurc <span class="ot">&lt;-</span> data_nchsurc <span class="sc">|&gt;</span></span>
+<span id="cb37-309"><a href="#cb37-309" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>nchsurc) <span class="sc">|&gt;</span></span>
+<span id="cb37-310"><a href="#cb37-310" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fips =</span> <span class="fu">if_else</span>(fips <span class="sc">==</span> <span class="st">"02063"</span>, <span class="st">"02261"</span>, fips)) <span class="sc">|&gt;</span></span>
+<span id="cb37-311"><a href="#cb37-311" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mutate(nchsurc = if_else(fips == "02063", "02261", nchsurc)) |&gt;</span></span>
+<span id="cb37-312"><a href="#cb37-312" aria-hidden="true" tabindex="-1"></a>  <span class="co"># re-join the NCHSURC dataset to update the fips code</span></span>
+<span id="cb37-313"><a href="#cb37-313" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb37-314"><a href="#cb37-314" aria-hidden="true" tabindex="-1"></a>    nchsurc,                              <span class="co"># the 'right' dataset</span></span>
+<span id="cb37-315"><a href="#cb37-315" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">join_by</span>(fips <span class="sc">==</span> fips),           <span class="co"># these variables must exactly match in both datasets</span></span>
+<span id="cb37-316"><a href="#cb37-316" aria-hidden="true" tabindex="-1"></a>    <span class="at">relationship =</span> <span class="st">"many-to-one"</span>)         <span class="co"># left_join will not work without specifying this relation</span></span>
+<span id="cb37-317"><a href="#cb37-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-318"><a href="#cb37-318" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(nchsurc))</span>
+<span id="cb37-319"><a href="#cb37-319" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-320"><a href="#cb37-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-321"><a href="#cb37-321" aria-hidden="true" tabindex="-1"></a><span class="fu">## CT</span></span>
+<span id="cb37-322"><a href="#cb37-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-323"><a href="#cb37-323" aria-hidden="true" tabindex="-1"></a>Apparently <span class="co">[</span><span class="ot">CT has switched from counties to planning ditricts</span><span class="co">](https://www.federalregister.gov/documents/2022/06/06/2022-12063/change-to-county-equivalents-in-the-state-of-connecticut)</span>, and the new codes are in the USGS dataset, but not in the NCHSURC dataset (as this dataset preceeds the switch).</span>
+<span id="cb37-324"><a href="#cb37-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-327"><a href="#cb37-327" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-328"><a href="#cb37-328" aria-hidden="true" tabindex="-1"></a>data_nchsurc <span class="sc">|&gt;</span></span>
+<span id="cb37-329"><a href="#cb37-329" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Prscrbr_State_Abrvtn <span class="sc">==</span> <span class="st">"CT"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb37-330"><a href="#cb37-330" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(fips) <span class="sc">|&gt;</span></span>
+<span id="cb37-331"><a href="#cb37-331" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb37-332"><a href="#cb37-332" aria-hidden="true" tabindex="-1"></a>    <span class="at">Missing_NCHSURC =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(nchsurc)),</span>
+<span id="cb37-333"><a href="#cb37-333" aria-hidden="true" tabindex="-1"></a>    <span class="at">N =</span> <span class="fu">n</span>()</span>
+<span id="cb37-334"><a href="#cb37-334" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span></span>
+<span id="cb37-335"><a href="#cb37-335" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(N)) <span class="sc">|&gt;</span></span>
+<span id="cb37-336"><a href="#cb37-336" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_totals</span>()</span>
+<span id="cb37-337"><a href="#cb37-337" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-338"><a href="#cb37-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-339"><a href="#cb37-339" aria-hidden="true" tabindex="-1"></a>Apparently filtering counties formed after 2014 from the USGS dataset has obviated the issue of CT updating its counties.</span>
+<span id="cb37-340"><a href="#cb37-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-341"><a href="#cb37-341" aria-hidden="true" tabindex="-1"></a><span class="fu">## Set Urban/Rural Classification</span></span>
+<span id="cb37-342"><a href="#cb37-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-343"><a href="#cb37-343" aria-hidden="true" tabindex="-1"></a>Cleanup: Correct values of query and state, remove unneeded variables, etc:</span>
+<span id="cb37-344"><a href="#cb37-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-347"><a href="#cb37-347" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-348"><a href="#cb37-348" aria-hidden="true" tabindex="-1"></a>data_nchsurc <span class="ot">&lt;-</span> data_nchsurc <span class="sc">|&gt;</span></span>
+<span id="cb37-349"><a href="#cb37-349" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Remove unneeded variables</span></span>
+<span id="cb37-350"><a href="#cb37-350" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>city_fixed, <span class="sc">-</span>fips0, <span class="sc">-</span>fips1) <span class="sc">|&gt;</span></span>
+<span id="cb37-351"><a href="#cb37-351" aria-hidden="true" tabindex="-1"></a>  <span class="co"># relocate address variables to after Prscrbr_State_FIPS</span></span>
+<span id="cb37-352"><a href="#cb37-352" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(</span>
+<span id="cb37-353"><a href="#cb37-353" aria-hidden="true" tabindex="-1"></a>    <span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"Prscrbr_St1"</span>, <span class="st">"Prscrbr_St2"</span>, <span class="st">"Prscrbr_zip5"</span>, <span class="st">"address"</span>, <span class="st">"fips"</span>)),</span>
+<span id="cb37-354"><a href="#cb37-354" aria-hidden="true" tabindex="-1"></a>    <span class="at">.after =</span> Prscrbr_State_FIPS</span>
+<span id="cb37-355"><a href="#cb37-355" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb37-356"><a href="#cb37-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-357"><a href="#cb37-357" aria-hidden="true" tabindex="-1"></a><span class="co"># check for missing values</span></span>
+<span id="cb37-358"><a href="#cb37-358" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(data_nchsurc<span class="sc">$</span>query0))</span>
+<span id="cb37-359"><a href="#cb37-359" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(data_nchsurc<span class="sc">$</span>fips))</span>
+<span id="cb37-360"><a href="#cb37-360" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-361"><a href="#cb37-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-362"><a href="#cb37-362" aria-hidden="true" tabindex="-1"></a>view values of nchsurc$nchsurc</span>
+<span id="cb37-363"><a href="#cb37-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-366"><a href="#cb37-366" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-367"><a href="#cb37-367" aria-hidden="true" tabindex="-1"></a>data_nchsurc <span class="sc">|&gt;</span></span>
+<span id="cb37-368"><a href="#cb37-368" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(nchsurc) <span class="sc">|&gt;</span></span>
+<span id="cb37-369"><a href="#cb37-369" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb37-370"><a href="#cb37-370" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n))</span>
+<span id="cb37-371"><a href="#cb37-371" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-372"><a href="#cb37-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-373"><a href="#cb37-373" aria-hidden="true" tabindex="-1"></a>set urban/rural classification</span>
+<span id="cb37-374"><a href="#cb37-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-377"><a href="#cb37-377" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-378"><a href="#cb37-378" aria-hidden="true" tabindex="-1"></a>data_nchsurc<span class="sc">$</span>ur <span class="ot">&lt;-</span> <span class="fu">if_else</span>(</span>
+<span id="cb37-379"><a href="#cb37-379" aria-hidden="true" tabindex="-1"></a>  data_nchsurc<span class="sc">$</span>nchsurc <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"5"</span>, <span class="st">"6"</span>),     <span class="co"># if nchsurc is rural</span></span>
+<span id="cb37-380"><a href="#cb37-380" aria-hidden="true" tabindex="-1"></a>  <span class="st">"rural"</span>,                                   <span class="co"># then rural</span></span>
+<span id="cb37-381"><a href="#cb37-381" aria-hidden="true" tabindex="-1"></a>  <span class="st">"urban"</span>,                                   <span class="co"># else urban</span></span>
+<span id="cb37-382"><a href="#cb37-382" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-383"><a href="#cb37-383" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-384"><a href="#cb37-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-385"><a href="#cb37-385" aria-hidden="true" tabindex="-1"></a>Tabulate condensed RUCA class vs NCHSURC</span>
+<span id="cb37-386"><a href="#cb37-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-389"><a href="#cb37-389" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-390"><a href="#cb37-390" aria-hidden="true" tabindex="-1"></a>data_nchsurc<span class="sc">$</span>RUCA_class <span class="ot">&lt;-</span> <span class="fu">case_when</span>(</span>
+<span id="cb37-391"><a href="#cb37-391" aria-hidden="true" tabindex="-1"></a>    data_nchsurc<span class="sc">$</span>Prscrbr_RUCA <span class="sc">&lt;</span> <span class="dv">4</span> <span class="sc">~</span> <span class="st">"Metropolitan"</span>,</span>
+<span id="cb37-392"><a href="#cb37-392" aria-hidden="true" tabindex="-1"></a>    data_nchsurc<span class="sc">$</span>Prscrbr_RUCA <span class="sc">&lt;</span> <span class="dv">7</span> <span class="sc">~</span> <span class="st">"Micropolitan"</span>,</span>
+<span id="cb37-393"><a href="#cb37-393" aria-hidden="true" tabindex="-1"></a>    data_nchsurc<span class="sc">$</span>Prscrbr_RUCA <span class="sc">&lt;</span> <span class="dv">10</span> <span class="sc">~</span> <span class="st">"Small Town"</span>,</span>
+<span id="cb37-394"><a href="#cb37-394" aria-hidden="true" tabindex="-1"></a>    data_nchsurc<span class="sc">$</span>Prscrbr_RUCA <span class="sc">&lt;</span> <span class="dv">99</span> <span class="sc">~</span> <span class="st">"Rural"</span>,</span>
+<span id="cb37-395"><a href="#cb37-395" aria-hidden="true" tabindex="-1"></a>    <span class="at">.default =</span> <span class="st">"Not Coded"</span>)</span>
+<span id="cb37-396"><a href="#cb37-396" aria-hidden="true" tabindex="-1"></a>data_nchsurc<span class="sc">$</span>NCHSURC_class <span class="ot">&lt;-</span> <span class="fu">case_when</span>(</span>
+<span id="cb37-397"><a href="#cb37-397" aria-hidden="true" tabindex="-1"></a>    data_nchsurc<span class="sc">$</span>nchsurc <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"Large central metro"</span>,</span>
+<span id="cb37-398"><a href="#cb37-398" aria-hidden="true" tabindex="-1"></a>    data_nchsurc<span class="sc">$</span>nchsurc <span class="sc">==</span> <span class="dv">2</span> <span class="sc">~</span> <span class="st">"Large fringe metro"</span>,</span>
+<span id="cb37-399"><a href="#cb37-399" aria-hidden="true" tabindex="-1"></a>    data_nchsurc<span class="sc">$</span>nchsurc <span class="sc">==</span> <span class="dv">3</span> <span class="sc">~</span> <span class="st">"Medium metro"</span>,</span>
+<span id="cb37-400"><a href="#cb37-400" aria-hidden="true" tabindex="-1"></a>    data_nchsurc<span class="sc">$</span>nchsurc <span class="sc">==</span> <span class="dv">4</span> <span class="sc">~</span> <span class="st">"Small metro"</span>,</span>
+<span id="cb37-401"><a href="#cb37-401" aria-hidden="true" tabindex="-1"></a>    data_nchsurc<span class="sc">$</span>nchsurc <span class="sc">==</span> <span class="dv">5</span> <span class="sc">~</span> <span class="st">"Micropolitan"</span>,</span>
+<span id="cb37-402"><a href="#cb37-402" aria-hidden="true" tabindex="-1"></a>    data_nchsurc<span class="sc">$</span>nchsurc <span class="sc">==</span> <span class="dv">6</span> <span class="sc">~</span> <span class="st">"Non-core"</span>)</span>
+<span id="cb37-403"><a href="#cb37-403" aria-hidden="true" tabindex="-1"></a><span class="co"># table</span></span>
+<span id="cb37-404"><a href="#cb37-404" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(data_nchsurc<span class="sc">$</span>RUCA_class, data_nchsurc<span class="sc">$</span>nchsurc)</span>
+<span id="cb37-405"><a href="#cb37-405" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-406"><a href="#cb37-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-407"><a href="#cb37-407" aria-hidden="true" tabindex="-1"></a>Cleanup and reorder variables</span>
+<span id="cb37-408"><a href="#cb37-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-411"><a href="#cb37-411" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-412"><a href="#cb37-412" aria-hidden="true" tabindex="-1"></a>data_nchsurc <span class="ot">&lt;-</span> data_nchsurc <span class="sc">|&gt;</span></span>
+<span id="cb37-413"><a href="#cb37-413" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(</span>
+<span id="cb37-414"><a href="#cb37-414" aria-hidden="true" tabindex="-1"></a>    <span class="fu">any_of</span>(<span class="fu">c</span>(<span class="st">"Prscrbr_RUCA"</span>, <span class="st">"RUCA_class"</span>, <span class="st">"nchsurc"</span>, <span class="st">"NCHSURC_class"</span>, <span class="st">"ur"</span>)),</span>
+<span id="cb37-415"><a href="#cb37-415" aria-hidden="true" tabindex="-1"></a>    <span class="at">.after =</span> fips_manual)</span>
+<span id="cb37-416"><a href="#cb37-416" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-417"><a href="#cb37-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-418"><a href="#cb37-418" aria-hidden="true" tabindex="-1"></a><span class="fu"># Save datasets</span></span>
+<span id="cb37-419"><a href="#cb37-419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-420"><a href="#cb37-420" aria-hidden="true" tabindex="-1"></a>Save datasets, and cleanup:</span>
+<span id="cb37-421"><a href="#cb37-421" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-424"><a href="#cb37-424" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-425"><a href="#cb37-425" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(</span>
+<span id="cb37-426"><a href="#cb37-426" aria-hidden="true" tabindex="-1"></a>  data_nchsurc,</span>
+<span id="cb37-427"><a href="#cb37-427" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"dataset/data_nchsurc.RData"</span>,</span>
+<span id="cb37-428"><a href="#cb37-428" aria-hidden="true" tabindex="-1"></a>  <span class="at">compress =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb37-429"><a href="#cb37-429" aria-hidden="true" tabindex="-1"></a>  <span class="at">compression_level =</span> <span class="dv">9</span></span>
+<span id="cb37-430"><a href="#cb37-430" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-431"><a href="#cb37-431" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb37-432"><a href="#cb37-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-433"><a href="#cb37-433" aria-hidden="true" tabindex="-1"></a><span class="fu"># Other Thoughts</span></span>
+<span id="cb37-434"><a href="#cb37-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-435"><a href="#cb37-435" aria-hidden="true" tabindex="-1"></a>Indication for OUD use (vs pain or EtOH use disorder) is a potential source of error when classifying prescriptions in the <span class="in">`tx`</span> variable.  Consider future methods to potentially validate OUD vs pain treatment designations (as time allows):</span>
+<span id="cb37-436"><a href="#cb37-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-437"><a href="#cb37-437" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Classify prescriptions as OUD vs pain vs EtOH use disorder based on KNN of names of other drugs prescribed by the provider</span>
+<span id="cb37-438"><a href="#cb37-438" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Query <span class="co">[</span><span class="ot">FDA NDC DB</span><span class="co">](https://open.fda.gov/apis/drug/ndc/how-to-use-the-endpoint/)</span> for NPIs associated with the values of <span class="in">`Brnd_Name`</span> and <span class="in">`Gnrc_Name`</span> which were matched above, then search those NDCs for the indication for use on DailyMed</span>
+<span id="cb37-439"><a href="#cb37-439" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Check DEA X waver for prescriber's NPI</span>
+<span id="cb37-440"><a href="#cb37-440" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Check prescriber's buprenorphine panel limit vs count of buprenorphine prescribed</span>
+<span id="cb37-441"><a href="#cb37-441" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Check prescriber's place of work in NPI DB</span>
+<span id="cb37-442"><a href="#cb37-442" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>interrogate/validate CMS's method for translating a drug's NDC into a drug's brand and generic names</span>
+<span id="cb37-443"><a href="#cb37-443" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>recalculate the rural-urban classification for each year using the <span class="co">[</span><span class="ot">census estimates</span><span class="co">](https://www.census.gov/programs-surveys/popest/data/data-sets.html)</span></span>
+<span id="cb37-444"><a href="#cb37-444" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-445"><a href="#cb37-445" aria-hidden="true" tabindex="-1"></a>Translation from NDC to a drug's brand/generic names likely simplifies many analyses, but could be a significant source of bias for our analysis.</span>
+<span id="cb37-446"><a href="#cb37-446" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-447"><a href="#cb37-447" aria-hidden="true" tabindex="-1"></a><span class="fu">## Alternate Approaches to Geocoding, Reverse Geocoding &amp; NCHSURC classification</span></span>
+<span id="cb37-448"><a href="#cb37-448" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-449"><a href="#cb37-449" aria-hidden="true" tabindex="-1"></a>Alternate geocoding:</span>
+<span id="cb37-450"><a href="#cb37-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-451"><a href="#cb37-451" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>The <span class="in">`geocode()`</span> function from the <span class="in">`ggmap`</span> package to find the coordinates for each city/state combination.  The function will return a dataframe with the coordinates for each city/state combination, and will also return a status code indicating whether the coordinates were found successfully.  We will use the status code to filter out any entries for which the coordinates were not found.  This method requires access to the google API.</span>
+<span id="cb37-452"><a href="#cb37-452" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-453"><a href="#cb37-453" aria-hidden="true" tabindex="-1"></a>Alternate reverse-geocoding:</span>
+<span id="cb37-454"><a href="#cb37-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-455"><a href="#cb37-455" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>The <span class="in">`fips()`</span> function from the <span class="in">`USAboundaries`</span> package to convert the coordinates to FIPS code.  This function uses the <span class="in">`sf`</span> package to find the FIPS code for the county in which the coordinates are located.  This method is the most straightforward, but it is also the slowest.</span>
+<span id="cb37-456"><a href="#cb37-456" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>The <span class="in">`fips()`</span> function from the <span class="in">`tigris`</span> package to convert the coordinates to FIPS code.  This function uses the <span class="in">`sf`</span> package to find the FIPS code for the county in which the coordinates are located.  This method is faster than the <span class="in">`USAboundaries`</span> method, but it is still relatively slow.</span>
+<span id="cb37-457"><a href="#cb37-457" aria-hidden="true" tabindex="-1"></a><span class="ss">   - </span>The <span class="in">`fips()`</span> function from the <span class="in">`MazamaSpatialUtils`</span> package to convert the coordinates to FIPS code.  This function uses a lookup table to find the FIPS code for the county in which the coordinates are located.  This method is the fastest, but it is also the least accurate.  The lookup table is based on the 2010 census, so it will not include any counties that were created after 2010.  This method will also not work for any coordinates that are outside of the US.</span>
+<span id="cb37-458"><a href="#cb37-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-459"><a href="#cb37-459" aria-hidden="true" tabindex="-1"></a>Rural-urban classification:</span>
+<span id="cb37-460"><a href="#cb37-460" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-461"><a href="#cb37-461" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Lookup rural-urban clssification: For this step we can used CDC's <span class="co">[</span><span class="ot">2013 Urban-Rural Classification Scheme for Counties</span><span class="co">](https://www.cdc.gov/nchs/data_access/urban_rural.htm)</span>; specifically the <span class="co">[</span><span class="ot">NCHSurbruralcodes Spreadsheet</span><span class="co">](https://www.cdc.gov/nchs/data/data_acces_files/NCHSURCodes2013.xlsx)</span> which contains the FIPS codes and rural-urban classifications for each county in the US.  The data can be plotted according to FIPS code using <span class="in">`ggplot2`</span> or <span class="in">`MazamaSpatialPlots`</span> packages.</span>
+<span id="cb37-462"><a href="#cb37-462" aria-hidden="true" tabindex="-1"></a><span class="ss"> - </span>Alternatively the classification could be manually recalculated from census data for each year.</span>
+<span id="cb37-463"><a href="#cb37-463" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-464"><a href="#cb37-464" aria-hidden="true" tabindex="-1"></a><span class="fu"># Session Info</span></span>
+<span id="cb37-465"><a href="#cb37-465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-468"><a href="#cb37-468" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb37-469"><a href="#cb37-469" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb37-470"><a href="#cb37-470" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>
