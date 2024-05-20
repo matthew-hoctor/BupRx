@@ -11,6 +11,8 @@ Materials and code for my MPH practice experience project on the effect of the C
     - [Provider and OUD treatment variables](https://matthew-hoctor.github.io/BupRx/dataset_tx.html)
     - [Geocoding to fips code](https://matthew-hoctor.github.io/BupRx/dataset_geo3.html)
     - [Rural-Urban Variables](https://matthew-hoctor.github.io/BupRx/dataset_nchsurc.html)
+    - Services Provided
+    - State Laws
     - [XGBoost prediction of ambiguous entries](https://matthew-hoctor.github.io/BupRx/classification.html)
  - Analysis
     - [Exploratory Analysis](https://matthew-hoctor.github.io/BupRx/exploratory.html)

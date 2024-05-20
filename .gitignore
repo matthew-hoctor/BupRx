@@ -50,3 +50,6 @@ rsconnect/
 
 # Ignore data files
 data/*
+
+# Ignore old files
+old/*
